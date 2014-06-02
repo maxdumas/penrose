@@ -13,24 +13,18 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class PenroseGame extends ApplicationAdapter implements InputProcessor {
-    public static final int BOARD_WIDTH = 128;
-    public static final int BOARD_HEIGHT = 128;
-    static final float cos30 = 0.866025403784438646763723f;
-    static final float sin30 = 0.5f;
-    static final float radius = 331 / 2f;
-    static float xOff = cos30 * radius;
-    static float yOff = sin30 * radius;
-
-    boolean rightDown = false;
-
+    boolean rightDown = false, placing = false;
 
     SpriteBatch batch;
 	TextureAtlas spritesheet;
-    Piece[][] board = new Piece[BOARD_WIDTH][BOARD_HEIGHT];
     OrthographicCamera camera;
+    final Piece ghost = new Piece(PieceArchetype.CONNECTOR_LONG, 0, 0);
+    final List<Piece> pieces = new ArrayList<Piece>();
 	
 	@Override
 	public void create () {
@@ -44,14 +38,6 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
         PieceArchetype.CONNECTOR_LONG.setTexture(spritesheet.findRegion("0_long_path"));
         PieceArchetype.CONNECTOR_MED.setTexture(spritesheet.findRegion("0_med_path"));
         PieceArchetype.CONNECTOR_SHORT.setTexture(spritesheet.findRegion("0_short_path"));
-
-        for (int i = 0; i < BOARD_WIDTH; ++i)
-            for (int j = 0; j < BOARD_HEIGHT; ++j) {
-                PieceArchetype a = PieceArchetype.values()[MathUtils.random(2)];
-                Piece piece = new Piece(a, (int)((j * 2 + i % 2) * xOff), (int) (i * yOff * 3f));
-                piece.rotationIndex = MathUtils.random(5);
-                board[i][j] = piece;
-            }
     }
 
 	@Override
@@ -62,10 +48,10 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
 
         batch.setProjectionMatrix(camera.combined);
 		batch.begin();
-		for(int i = 0; i < BOARD_WIDTH; ++i)
-            for(int j = 0; j < BOARD_HEIGHT; ++j) {
-                board[i][j].draw(batch);
-            }
+        // Display things here
+        for(Piece piece : pieces)
+            piece.draw(batch);
+        if(placing) ghost.draw(batch);
 		batch.end();
 	}
 
@@ -79,7 +65,22 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
         switch(keycode) {
             case Input.Keys.ESCAPE:
                 Gdx.app.exit();
-
+                break;
+            case Input.Keys.NUM_1:
+                placing = true;
+                ghost.type = PieceArchetype.CONNECTOR_LONG;
+                mouseMoved(Gdx.input.getX(), Gdx.input.getY());
+                break;
+            case Input.Keys.NUM_2:
+                placing = true;
+                ghost.type = PieceArchetype.CONNECTOR_MED;
+                mouseMoved(Gdx.input.getX(), Gdx.input.getY());
+                break;
+            case Input.Keys.NUM_3:
+                placing = true;
+                ghost.type = PieceArchetype.CONNECTOR_SHORT;
+                mouseMoved(Gdx.input.getX(), Gdx.input.getY());
+                break;
         }
         return true;
     }
@@ -96,17 +97,18 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
                 rightDown = true;
                 break;
             case Input.Buttons.LEFT:
-                Vector3 worldCoords = camera.unproject(new Vector3(screenX, screenY, 0f));
-                float x = worldCoords.x, y = worldCoords.y;
-
-
-
-//                int i = (int) (y / (3f * yOff)), j;
-//                if (i % 2 != 0)
-//                    j = (int) (x / (2f * xOff) - 0.5f);
-//                else j = (int) (x / (2f * xOff));
-//                if (i >= 0 && j >= 0)
-//                    board[i][j].rotationIndex += 1;
+                if(placing) {
+                    Vector3 worldCoords = camera.unproject(new Vector3(screenX, screenY, 0f));
+                    float x = worldCoords.x, y = worldCoords.y;
+                    placing = false;
+                    // We now want to snap the ghost piece to the hex grid before we place it
+                    ghost.setPos((int)x, (int)y);
+                    ghost.snapToHex();
+                    pieces.add(new Piece(ghost));
+                }
+                break;
+            case Input.Buttons.MIDDLE:
+                ghost.rotate(true);
         }
 
         return true;
@@ -131,6 +133,12 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
 
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
+        Vector3 worldCoords = camera.unproject(new Vector3(screenX, screenY, 0f));
+        float x = worldCoords.x, y = worldCoords.y;
+        if(placing) {
+            ghost.x = (int)(x - ghost.type.centerX);
+            ghost.y = (int)(y - ghost.type.centerY);
+        }
         return false;
     }
 

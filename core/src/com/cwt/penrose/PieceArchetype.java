@@ -6,15 +6,15 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
  * Created by Max on 5/29/2014.
  */
 public enum PieceArchetype {
-    CONNECTOR_LONG(1 << 0| 1 << 5), // Long connector has edges 0 and 5 passable
-    CONNECTOR_SHORT(1 << 1 | 1 << 2), // Short connector has edges 1 and 2 passable
-    CONNECTOR_MED(1 << 2 | 1 << 4); // Medium connector has edges 2 and 4 passable
+    CONNECTOR_LONG(new EdgeState[] {EdgeState.NONE, EdgeState.ANY, EdgeState.NONE, EdgeState.NONE, EdgeState.ANY, EdgeState.NONE}), // Long connector has edges 1 and 4 passable
+    CONNECTOR_MED(new EdgeState[] {EdgeState.NONE, EdgeState.NONE, EdgeState.ANY, EdgeState.NONE, EdgeState.ANY, EdgeState.NONE}), // Short connector has edges 2 and 4 passable
+    CONNECTOR_SHORT(new EdgeState[] {EdgeState.NONE, EdgeState.NONE, EdgeState.NONE, EdgeState.NONE, EdgeState.ANY, EdgeState.ANY}); // Medium connector has edges 4 and 5 passable
 
     private TextureRegion texture;
     public int width, height, centerX, centerY;
-    protected final int edges;
+    protected final EdgeState[] edges;
 
-    private PieceArchetype(int edges) {
+    private PieceArchetype(EdgeState[] edges) {
         this.edges = edges;
     }
 
