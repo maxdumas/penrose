@@ -102,9 +102,16 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
                     float x = worldCoords.x, y = worldCoords.y;
                     placing = false;
                     // We now want to snap the ghost piece to the hex grid before we place it
-                    ghost.setPos((int)x, (int)y);
+                    ghost.setPos((int) x, (int) y);
                     ghost.snapToHex();
-                    pieces.add(new Piece(ghost));
+                    System.out.println("Attempting to place ghost at (" + ghost.i + ", " + ghost.j + ")...");
+                    if (pieces.isEmpty()) pieces.add(new Piece(ghost));
+                    else
+                        for (Piece p : pieces)
+                            if (p.isPieceAdjacent(ghost)) {
+                                pieces.add(new Piece(ghost));
+                                break;
+                            }
                 }
                 break;
             case Input.Buttons.MIDDLE:
@@ -136,6 +143,7 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
         Vector3 worldCoords = camera.unproject(new Vector3(screenX, screenY, 0f));
         float x = worldCoords.x, y = worldCoords.y;
         if(placing) {
+            // Centers the pieces around the mouse position.
             ghost.x = (int)(x - ghost.type.centerX);
             ghost.y = (int)(y - ghost.type.centerY);
         }

@@ -1,5 +1,6 @@
 package com.cwt.penrose;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 
@@ -20,16 +21,15 @@ public class Piece {
             new int[]{+1, -1},
             new int[]{+0, -1},
             new int[]{-1, +0},
-            new int[]{+0, +1},
-            new int[]{+1, +1}
+            new int[]{-1, +1},
+            new int[]{+0, +1}
     };
 
     public PieceArchetype type;
     public int rotationIndex, x, y, i, j;
 
     public Piece(PieceArchetype type, int x, int y) {
-        this.x = x;
-        this.y = y;
+        setPos(x, y);
         this.type = type;
 
         rotationIndex = 0;
@@ -40,6 +40,8 @@ public class Piece {
         this.rotationIndex = that.rotationIndex;
         this.x = that.x;
         this.y = that.y;
+        this.i = that.i;
+        this.j = that.j;
     }
 
     public void draw(SpriteBatch batch) {
@@ -72,8 +74,8 @@ public class Piece {
     }
 
     public void snapToHex() {
-        x = (int) ((i + j % 2 / 2f)* xOff);
-        y = (int) (j * yOff);
+        x = MathUtils.floor((i + j % 2 / 2f)* xOff);
+        y = MathUtils.floor(j * yOff);
     }
 
     /**
@@ -83,7 +85,29 @@ public class Piece {
      * @param e the edge number to test against
      * @return
      */
-//    public boolean isEdgePassable(int e) {
-//        return ((type.edges - rotationIndex) % rotationIndex) >> e != 0;
-//    }
+    public boolean isEdgePassable(int e) {
+        int i = adjustForIndex(e); // Our rotation-adjusted index
+        return type.edges[i] == EdgeState.ANY;
+    }
+
+    public boolean isPieceAdjacent(Piece other) {
+        for(int e = 0; e < 6; ++e) { // Loop through all edges
+            int k = adjustForIndex(e); // Our rotation-adjusted index
+            if(type.edges[k] == EdgeState.ANY) {
+                int u = i + offsetTable[k][0], v = j + offsetTable[k][1];
+                System.out.println("Edge " + e + "(" + k + ")  at (" + i + ", " + j + ") is passable. Checking its offset, (" + u + ", " + v + "), for match.");
+                if(other.i == u && other.j == v) {
+                    System.out.println("Match found!");
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private int adjustForIndex(int k) {
+        if(rotationIndex == 0) return k;
+        else return ((k + rotationIndex) % rotationIndex);
+    }
 }
