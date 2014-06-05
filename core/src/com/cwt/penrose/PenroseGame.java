@@ -105,7 +105,6 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
                     ghost.setPos((int) x, (int) y);
                     ghost.snapToHex();
                     System.out.println("Attempting to place ghost at (" + ghost.r + ", " + ghost.g + ", " + ghost.b + ")...");
-//                    pieces.add(new Piece(ghost));
                     if (pieces.isEmpty()) pieces.add(new Piece(ghost));
                     else
                         for (Piece p : pieces)

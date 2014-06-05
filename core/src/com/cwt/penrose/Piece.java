@@ -28,7 +28,6 @@ public class Piece {
     public Piece(PieceArchetype type, int x, int y) {
         setPos(x, y);
         this.type = type;
-
         rotationIndex = 0;
     }
 
@@ -67,21 +66,21 @@ public class Piece {
 
     public void setX(int nx) {
         x = nx;
-        r = MathUtils.floor((sqrt3  * x - y) / (3 * radius));
+        r = MathUtils.round((sqrt3  * x - y) / (3 * radius));
         g = MathUtils.floor((-sqrt3 * x - y) / (3 * radius));
         b = -(r + g);
     }
 
     public void setY(int ny) {
         y = ny;
-        r = MathUtils.floor((sqrt3  * x - y) / (3 * radius));
-        g = MathUtils.floor((-sqrt3 * x - y) / (3 * radius));
+        r = MathUtils.round((sqrt3  * x - y) / (3 * radius));
+        g = MathUtils.round((-sqrt3 * x - y) / (3 * radius));
         b = -(r + g);
     }
 
     public void snapToHex() {
-        x = MathUtils.floor(sqrt3 * radius * (b / 2f + r));
-        y = MathUtils.floor(3f / 2f * radius * b);
+        x = MathUtils.round(sqrt3 * radius * (b / 2f + r));
+        y = MathUtils.round(3f / 2f * radius * b);
     }
 
     /**
@@ -100,7 +99,7 @@ public class Piece {
         for(int e = 0; e < 6; ++e) { // Loop through all edges
             int k = adjustForIndex(e); // Our rotation-adjusted index
             if(type.edges[k] == EdgeState.ANY) {
-                int u = r + offsetTable[k][0], v = g + offsetTable[k][1], w = b + offsetTable[k][2];
+                int u = r + offsetTable[e][0], v = g + offsetTable[e][1], w = b + offsetTable[e][2];
                 System.out.println("Edge " + e + "(" + k + ")  at (" + r + ", " + g + ", " + b + ") is passable. Checking its offset, (" + u + ", " + v + ", " + w + "), for match.");
                 if(other.r == u && other.g == v && other.b == w) {
                     System.out.println("Match found!");
@@ -113,7 +112,6 @@ public class Piece {
     }
 
     private int adjustForIndex(int k) {
-        if(rotationIndex == 0) return k;
-        else return ((k + rotationIndex) % rotationIndex);
+        return ((k + rotationIndex) % 6);
     }
 }
