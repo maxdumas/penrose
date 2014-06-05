@@ -104,7 +104,8 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
                     // We now want to snap the ghost piece to the hex grid before we place it
                     ghost.setPos((int) x, (int) y);
                     ghost.snapToHex();
-                    System.out.println("Attempting to place ghost at (" + ghost.i + ", " + ghost.j + ")...");
+                    System.out.println("Attempting to place ghost at (" + ghost.r + ", " + ghost.g + ", " + ghost.b + ")...");
+//                    pieces.add(new Piece(ghost));
                     if (pieces.isEmpty()) pieces.add(new Piece(ghost));
                     else
                         for (Piece p : pieces)
@@ -144,8 +145,8 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
         float x = worldCoords.x, y = worldCoords.y;
         if(placing) {
             // Centers the pieces around the mouse position.
-            ghost.x = (int)(x - ghost.type.centerX);
-            ghost.y = (int)(y - ghost.type.centerY);
+            ghost.x = (int)x;
+            ghost.y = (int)y;
         }
         return false;
     }
