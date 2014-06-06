@@ -6,16 +6,9 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 public class PenroseGame extends ApplicationAdapter implements InputProcessor {
     boolean rightDown = false, placing = false;
@@ -24,7 +17,7 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
 	TextureAtlas spritesheet;
     OrthographicCamera camera;
     final Piece ghost = new Piece(PieceArchetype.CONNECTOR_LONG, 0, 0);
-    final List<Piece> pieces = new ArrayList<Piece>();
+    final HexBoard board = new HexBoard();
 	
 	@Override
 	public void create () {
@@ -49,8 +42,7 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
         batch.setProjectionMatrix(camera.combined);
 		batch.begin();
         // Display things here
-        for(Piece piece : pieces)
-            piece.draw(batch);
+        board.draw(batch);
         if(placing) ghost.draw(batch);
 		batch.end();
 	}
@@ -105,13 +97,7 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
                     ghost.setPos((int) x, (int) y);
                     ghost.snapToHex();
                     System.out.println("Attempting to place ghost at (" + ghost.r + ", " + ghost.g + ", " + ghost.b + ")...");
-                    if (pieces.isEmpty()) pieces.add(new Piece(ghost));
-                    else
-                        for (Piece p : pieces)
-                            if (p.isPieceAdjacent(ghost)) {
-                                pieces.add(new Piece(ghost));
-                                break;
-                            }
+                    board.placePiece(ghost);
                 }
                 break;
             case Input.Buttons.MIDDLE:
@@ -143,11 +129,10 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
         Vector3 worldCoords = camera.unproject(new Vector3(screenX, screenY, 0f));
         float x = worldCoords.x, y = worldCoords.y;
         if(placing) {
-            // Centers the pieces around the mouse position.
             ghost.x = (int)x;
             ghost.y = (int)y;
         }
-        return false;
+        return true;
     }
 
     @Override

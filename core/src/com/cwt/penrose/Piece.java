@@ -1,6 +1,5 @@
 package com.cwt.penrose;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 
@@ -23,6 +22,8 @@ public class Piece {
     };
 
     public PieceArchetype type;
+    // It should be noted that any two of r, g, b are all that we require, but we keep
+    // them all for simplicity
     public int rotationIndex, x, y, r, g, b;
 
     public Piece(PieceArchetype type, int x, int y) {
@@ -59,21 +60,21 @@ public class Piece {
         x = nx;
         y = ny;
 
-        b = MathUtils.round((2f * y) / (3f * radius));
-        r = MathUtils.round((sqrt3  * x - y) / (3f * radius));
+        r = MathUtils.round((sqrt3 * x - y) / (3f * radius));
         g = MathUtils.round((-sqrt3 * x - y) / (3f * radius));
+        b = -(r + g);
     }
 
     public void setX(int nx) {
         x = nx;
-        r = MathUtils.round((sqrt3  * x - y) / (3 * radius));
+        r = MathUtils.round((sqrt3 * x - y) / (3 * radius));
         g = MathUtils.floor((-sqrt3 * x - y) / (3 * radius));
         b = -(r + g);
     }
 
     public void setY(int ny) {
         y = ny;
-        r = MathUtils.round((sqrt3  * x - y) / (3 * radius));
+        r = MathUtils.round((sqrt3 * x - y) / (3 * radius));
         g = MathUtils.round((-sqrt3 * x - y) / (3 * radius));
         b = -(r + g);
     }
@@ -90,19 +91,17 @@ public class Piece {
      * @param e the edge number to test against
      * @return
      */
-    public boolean isEdgePassable(int e) {
+    public boolean isEdgeOpen(int e) {
         int i = adjustForIndex(e); // Our rotation-adjusted index
         return type.edges[i] == EdgeState.ANY;
     }
 
     public boolean isPieceAdjacent(Piece other) {
         for(int e = 0; e < 6; ++e) { // Loop through all edges
-            int k = adjustForIndex(e); // Our rotation-adjusted index
-            if(type.edges[k] == EdgeState.ANY) {
+            if(isEdgeOpen(e)) {
+                // We use the offset table to find the location of the space adjacent to our open edge
                 int u = r + offsetTable[e][0], v = g + offsetTable[e][1], w = b + offsetTable[e][2];
-                System.out.println("Edge " + e + "(" + k + ")  at (" + r + ", " + g + ", " + b + ") is passable. Checking its offset, (" + u + ", " + v + ", " + w + "), for match.");
                 if(other.r == u && other.g == v && other.b == w) {
-                    System.out.println("Match found!");
                     return true;
                 }
             }
