@@ -12,13 +12,13 @@ public class Piece {
     private static final float sqrt3 = 1.732050807568877293527f;
     private static final float radius = 331 / 2f;
 
-    private static final int[][] offsetTable = new int[][] {
-            new int[]{+1, -1, +0},
-            new int[]{+1, +0, -1},
-            new int[]{+0, +1, -1},
-            new int[]{-1, +1, +0},
-            new int[]{-1, +0, +1},
-            new int[]{+0, -1, +1}
+    private static final int[][] offsetTable = new int[][] { // We count edges from 0 to five, starting at rightmost edge
+            new int[]{+1, -1, +0}, // Rightmost edge
+            new int[]{+1, +0, -1}, // Bottom-right edge
+            new int[]{+0, +1, -1}, // Bottom-left edge
+            new int[]{-1, +1, +0}, // Left edge
+            new int[]{-1, +0, +1}, // Top-left edge
+            new int[]{+0, -1, +1}  // Top-right edge
     };
 
     public PieceArchetype type;
@@ -47,6 +47,8 @@ public class Piece {
     }
 
     public void rotate(boolean ccw) {
+        if(PieceArchetype.NODES.contains(this.type)) return;
+
         if(ccw)
             rotationIndex = (rotationIndex + 1) % 6;
         else rotationIndex = (rotationIndex - 1) % 6;
@@ -91,26 +93,38 @@ public class Piece {
      * @param e the edge number to test against
      * @return
      */
-    public boolean isEdgeOpen(int e) {
-        int i = adjustForIndex(e); // Our rotation-adjusted index
-        return type.edges[i] == EdgeState.ANY;
+    public boolean isEdgePassable(int e) {
+        return edgeState(e) != EdgeType.NONE;
     }
 
-    public boolean isPieceAdjacent(Piece other) {
+    public EdgeType edgeState(int e) {
+        int i = adjustForRotation(e); // Our rotation-adjusted index
+        return type.edges[i];
+    }
+
+    /**
+     * Returns the open edge of this Piece that is adjacent the other Piece.
+     * Returns -1 if no such edge exists, -2 if the two pieces are rooms and thus cannot be adjacent.
+     * @param other
+     * @return
+     */
+    public int adjacentEdge(Piece other) {
+        if(PieceArchetype.NODES.contains(other.type) && PieceArchetype.NODES.contains(this.type))
+            return -2;
         for(int e = 0; e < 6; ++e) { // Loop through all edges
-            if(isEdgeOpen(e)) {
+            if(isEdgePassable(e)) {
                 // We use the offset table to find the location of the space adjacent to our open edge
                 int u = r + offsetTable[e][0], v = g + offsetTable[e][1], w = b + offsetTable[e][2];
                 if(other.r == u && other.g == v && other.b == w) {
-                    return true;
+                    return e;
                 }
             }
         }
 
-        return false;
+        return -1;
     }
 
-    private int adjustForIndex(int k) {
+    protected int adjustForRotation(int k) {
         return ((k + rotationIndex) % 6);
     }
 }

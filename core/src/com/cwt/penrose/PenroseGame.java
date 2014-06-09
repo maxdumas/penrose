@@ -31,6 +31,20 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
         PieceArchetype.CONNECTOR_LONG.setTexture(spritesheet.findRegion("0_long_path"));
         PieceArchetype.CONNECTOR_MED.setTexture(spritesheet.findRegion("0_med_path"));
         PieceArchetype.CONNECTOR_SHORT.setTexture(spritesheet.findRegion("0_short_path"));
+
+        PieceArchetype.NODE_IN_0.setTexture(spritesheet.findRegion("node_in_C"));
+        PieceArchetype.NODE_IN_1.setTexture(spritesheet.findRegion("node_in_D"));
+        PieceArchetype.NODE_IN_2.setTexture(spritesheet.findRegion("node_in_E"));
+        PieceArchetype.NODE_IN_3.setTexture(spritesheet.findRegion("node_in_F"));
+        PieceArchetype.NODE_IN_4.setTexture(spritesheet.findRegion("node_in_A"));
+        PieceArchetype.NODE_IN_5.setTexture(spritesheet.findRegion("node_in_B"));
+
+        PieceArchetype.NODE_OUT_0.setTexture(spritesheet.findRegion("node_out_C"));
+        PieceArchetype.NODE_OUT_1.setTexture(spritesheet.findRegion("node_out_D"));
+        PieceArchetype.NODE_OUT_2.setTexture(spritesheet.findRegion("node_out_E"));
+        PieceArchetype.NODE_OUT_3.setTexture(spritesheet.findRegion("node_out_F"));
+        PieceArchetype.NODE_OUT_4.setTexture(spritesheet.findRegion("node_out_A"));
+        PieceArchetype.NODE_OUT_5.setTexture(spritesheet.findRegion("node_out_B"));
     }
 
 	@Override
@@ -43,7 +57,8 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
 		batch.begin();
         // Display things here
         board.draw(batch);
-        if(placing) ghost.draw(batch);
+        if(placing)
+            ghost.draw(batch);
 		batch.end();
 	}
 
@@ -61,18 +76,29 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
             case Input.Keys.NUM_1:
                 placing = true;
                 ghost.type = PieceArchetype.CONNECTOR_LONG;
-                mouseMoved(Gdx.input.getX(), Gdx.input.getY());
                 break;
             case Input.Keys.NUM_2:
                 placing = true;
                 ghost.type = PieceArchetype.CONNECTOR_MED;
-                mouseMoved(Gdx.input.getX(), Gdx.input.getY());
                 break;
             case Input.Keys.NUM_3:
                 placing = true;
                 ghost.type = PieceArchetype.CONNECTOR_SHORT;
-                mouseMoved(Gdx.input.getX(), Gdx.input.getY());
                 break;
+            case Input.Keys.NUM_4:
+                placing = true;
+                ghost.type = PieceArchetype.NODE_IN_4;
+                break;
+            case Input.Keys.NUM_5:
+                placing = true;
+                ghost.type = PieceArchetype.NODE_IN_5;
+
+                break;
+        }
+
+        if(placing) {
+            ghost.rotationIndex = 0;
+            mouseMoved(Gdx.input.getX(), Gdx.input.getY());
         }
         return true;
     }
