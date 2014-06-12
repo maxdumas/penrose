@@ -78,45 +78,44 @@ public class HexBoard {
      * @return
      */
     private boolean validate() {
-        // We want to ensure that there is no path from an edge of a room of one type to a same-type edge in another room
-        // We know that the first piece will always be a room, so we want to start searching from there.
-        // We will use a depth-first search for this purpose
-        // We also want to check if all three rooms have been connected.
-
+        // The number of connected rooms (we always start with 1 room because the first piece is always a room
         int nRooms = 1;
-        HashSet<Piece> visited = new HashSet<Piece>(pieces.size()); //Presence indicates that the piece has been visited
+        // The type of the edge of the last room from which we projected our search
+        EdgeType outgoing = null;
+        // The set of pieces that have been visited as keys, with their parents in the DFS tree as the value
+        HashMap<Piece, Piece> visited = new HashMap<Piece, Piece>(pieces.size());
         Stack<Piece> s = new Stack<Piece>();
         s.push(pieces.get(0));
-        visited.add(pieces.get(0));
-        EdgeType outEdge = null, inEdge = null;
+        visited.put(pieces.get(0), null);
 
-        while(!s.isEmpty()) {
-            Piece p = s.peek();
-            Piece child = null;
-            Piece[] n = adj.get(p);
-            for(int i = 0; i < 6; ++i)
-                if(!visited.contains(n[i])) {
-                    child = n[i];
-                    if(child != null) {
-                        if (PieceArchetype.NODES.contains(p.type))
-                            outEdge = p.edgeState(i);
-                        inEdge = child.edgeState((i + 3) % 6);
-                        break;
+        while (!s.isEmpty()) {
+            Piece v = s.pop();
+            Piece[] n = adj.get(v);
+            for (int i = 0; i < 6; ++i)
+                if (n[i] != null) {
+                    Piece w = n[i];
+                    if (!visited.containsKey(w)) {
+                        if (PieceArchetype.isNode(v)) outgoing = v.edgeType(i);
+
+                        if (PieceArchetype.isNode(w)) {
+                            EdgeType incoming = w.edgeType((i + 3) % 6);
+                            if (outgoing != EdgeType.ANY && outgoing == incoming)
+                                return false; // Edges are not pair correctly, so we're done here
+                            else ++nRooms; // Everything is good, so we've connected another room!
+                        }
+                        visited.put(w, v);
+                        s.push(w);
+                    }
+                    // If v was already visited, we've found a cycle so we're only good if that cycle is connecting all 3 rooms
+                    // unless w is the parent of v, in which case, false alarm!
+                    else if (visited.get(v) != w) {
+                        if (nRooms == 3) { // All 3 rooms are connected in a cycle! That means victory!
+                            System.out.println("I WIN. YES!@!!!@#$@$");
+                            return true;
+                        } else return false;
                     }
                 }
-
-            if(child != null) {
-                visited.add(child);
-                // If this occurs then we have a node mismatch and shit is borked
-                if(PieceArchetype.NODES.contains(child.type)) {
-                    if(outEdge == EdgeType.IN && inEdge == EdgeType.IN || outEdge == EdgeType.OUT && inEdge == EdgeType.OUT)
-                        return false;
-                    else ++nRooms;
-                }
-                s.push(child);
-            } else s.pop();
         }
-        if(nRooms == 3) System.out.println("VICTORY!!!!!!!!!!!!!!!!!!!!!");
         return true;
     }
 }

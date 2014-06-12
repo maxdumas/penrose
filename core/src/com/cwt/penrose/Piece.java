@@ -94,10 +94,10 @@ public class Piece {
      * @return
      */
     public boolean isEdgePassable(int e) {
-        return edgeState(e) != EdgeType.NONE;
+        return edgeType(e) != EdgeType.NONE;
     }
 
-    public EdgeType edgeState(int e) {
+    public EdgeType edgeType(int e) {
         int i = adjustForRotation(e); // Our rotation-adjusted index
         return type.edges[i];
     }

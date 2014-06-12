@@ -63,4 +63,8 @@ public enum PieceArchetype {
     }
 
     public TextureRegion getTexture() { return this.texture; }
+
+    public static boolean isNode(Piece p) { return NODES.contains(p.type); }
+
+    public static boolean isConnector(Piece p) { return CONNECTORS.contains(p.type); }
 }
