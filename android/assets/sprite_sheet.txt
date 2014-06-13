@@ -1,0 +1,109 @@
+sprite_sheet.png
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+0_long_path
+  rotate: false
+  xy: 2, 2
+  size: 295, 331
+  orig: 295, 331
+  offset: 0, 0
+  index: -1
+0_med_path
+  rotate: false
+  xy: 299, 2
+  size: 295, 331
+  orig: 295, 331
+  offset: 0, 0
+  index: -1
+0_short_path
+  rotate: false
+  xy: 596, 2
+  size: 295, 331
+  orig: 295, 331
+  offset: 0, 0
+  index: -1
+node_in_A
+  rotate: false
+  xy: 893, 2
+  size: 295, 331
+  orig: 295, 331
+  offset: 0, 0
+  index: -1
+node_in_B
+  rotate: false
+  xy: 1190, 2
+  size: 295, 331
+  orig: 295, 331
+  offset: 0, 0
+  index: -1
+node_in_C
+  rotate: false
+  xy: 2, 335
+  size: 295, 331
+  orig: 295, 331
+  offset: 0, 0
+  index: -1
+node_in_D
+  rotate: false
+  xy: 299, 335
+  size: 295, 331
+  orig: 295, 331
+  offset: 0, 0
+  index: -1
+node_in_E
+  rotate: false
+  xy: 596, 335
+  size: 295, 331
+  orig: 295, 331
+  offset: 0, 0
+  index: -1
+node_in_F
+  rotate: false
+  xy: 893, 335
+  size: 295, 331
+  orig: 295, 331
+  offset: 0, 0
+  index: -1
+node_out_A
+  rotate: false
+  xy: 1190, 335
+  size: 295, 331
+  orig: 295, 331
+  offset: 0, 0
+  index: -1
+node_out_B
+  rotate: false
+  xy: 2, 668
+  size: 295, 331
+  orig: 295, 331
+  offset: 0, 0
+  index: -1
+node_out_C
+  rotate: false
+  xy: 299, 668
+  size: 295, 331
+  orig: 295, 331
+  offset: 0, 0
+  index: -1
+node_out_D
+  rotate: false
+  xy: 596, 668
+  size: 295, 331
+  orig: 295, 331
+  offset: 0, 0
+  index: -1
+node_out_E
+  rotate: false
+  xy: 893, 668
+  size: 295, 331
+  orig: 295, 331
+  offset: 0, 0
+  index: -1
+node_out_F
+  rotate: false
+  xy: 1190, 668
+  size: 295, 331
+  orig: 295, 331
+  offset: 0, 0
+  index: -1
