@@ -7,7 +7,7 @@ import java.util.*;
 /**
  * Created by Max on 6/5/2014.
  */
-public class HexBoard {
+public class Area {
     final List<Piece> pieces = new ArrayList<Piece>();
     final HashMap<Piece, Piece[]> adj = new HashMap<Piece, Piece[]>();
 
@@ -74,7 +74,7 @@ public class HexBoard {
     }
 
     /**
-     * This method validates the current state of the board and checks if a victory condition has been met.
+     * Validates the current state of the board and checks if a victory condition has been met.
      * @return
      */
     private boolean validate() {
@@ -95,9 +95,8 @@ public class HexBoard {
                 if (n[i] != null) {
                     Piece w = n[i];
                     if (!visited.containsKey(w)) {
-                        if (PieceArchetype.isNode(v)) outgoing = v.edgeType(i);
-
-                        if (PieceArchetype.isNode(w)) {
+                        if (PieceArchetype.isRoom(v)) outgoing = v.edgeType(i);
+                        if (PieceArchetype.isRoom(w)) {
                             EdgeType incoming = w.edgeType((i + 3) % 6);
                             if (outgoing != EdgeType.ANY && outgoing == incoming)
                                 return false; // Edges are not pair correctly, so we're done here

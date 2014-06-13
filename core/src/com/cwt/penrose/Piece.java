@@ -9,10 +9,10 @@ import com.badlogic.gdx.math.MathUtils;
 public class Piece {
     // Constants
     private static final float ROT_INTERVAL = 60.0f;
-    private static final float sqrt3 = 1.732050807568877293527f;
-    private static final float radius = 331 / 2f;
-
-    private static final int[][] offsetTable = new int[][] { // We count edges from 0 to five, starting at rightmost edge
+    private static final float SQRT_3 = 1.732050807568877293527f;
+    private static final float RADIUS = 331 / 2f;
+    // Table containing coordinate offsets for pieces adjacent to each of a given piece's 6 edges
+    private static final int[][] OFFSET_TABLE = new int[][] { // We count edges from 0 to five, starting at rightmost edge
             new int[]{+1, -1, +0}, // Rightmost edge
             new int[]{+1, +0, -1}, // Bottom-right edge
             new int[]{+0, +1, -1}, // Bottom-left edge
@@ -47,7 +47,7 @@ public class Piece {
     }
 
     public void rotate(boolean ccw) {
-        if(PieceArchetype.NODES.contains(this.type)) return;
+        if(PieceArchetype.ROOMS.contains(this.type)) return;
 
         if(ccw)
             rotationIndex = (rotationIndex + 1) % 6;
@@ -62,28 +62,28 @@ public class Piece {
         x = nx;
         y = ny;
 
-        r = MathUtils.round((sqrt3 * x - y) / (3f * radius));
-        g = MathUtils.round((-sqrt3 * x - y) / (3f * radius));
+        r = MathUtils.round((SQRT_3 * x - y) / (3f * RADIUS));
+        g = MathUtils.round((-SQRT_3 * x - y) / (3f * RADIUS));
         b = -(r + g);
     }
 
     public void setX(int nx) {
         x = nx;
-        r = MathUtils.round((sqrt3 * x - y) / (3 * radius));
-        g = MathUtils.floor((-sqrt3 * x - y) / (3 * radius));
+        r = MathUtils.round((SQRT_3 * x - y) / (3f * RADIUS));
+        g = MathUtils.floor((-SQRT_3 * x - y) / (3f * RADIUS));
         b = -(r + g);
     }
 
     public void setY(int ny) {
         y = ny;
-        r = MathUtils.round((sqrt3 * x - y) / (3 * radius));
-        g = MathUtils.round((-sqrt3 * x - y) / (3 * radius));
+        r = MathUtils.round((SQRT_3 * x - y) / (3f * RADIUS));
+        g = MathUtils.round((-SQRT_3 * x - y) / (3f * RADIUS));
         b = -(r + g);
     }
 
     public void snapToHex() {
-        x = MathUtils.round(sqrt3 * radius * (b / 2f + r));
-        y = MathUtils.round(3f / 2f * radius * b);
+        x = MathUtils.round(SQRT_3 * RADIUS * (b / 2f + r));
+        y = MathUtils.round(3f / 2f * RADIUS * b);
     }
 
     /**
@@ -109,12 +109,12 @@ public class Piece {
      * @return
      */
     public int adjacentEdge(Piece other) {
-        if(PieceArchetype.NODES.contains(other.type) && PieceArchetype.NODES.contains(this.type))
+        if(PieceArchetype.isRoom(other) && PieceArchetype.isRoom(this))
             return -2;
         for(int e = 0; e < 6; ++e) { // Loop through all edges
             if(isEdgePassable(e)) {
                 // We use the offset table to find the location of the space adjacent to our open edge
-                int u = r + offsetTable[e][0], v = g + offsetTable[e][1], w = b + offsetTable[e][2];
+                int u = r + OFFSET_TABLE[e][0], v = g + OFFSET_TABLE[e][1], w = b + OFFSET_TABLE[e][2];
                 if(other.r == u && other.g == v && other.b == w) {
                     return e;
                 }

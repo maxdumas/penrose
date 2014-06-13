@@ -16,8 +16,8 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
     SpriteBatch batch;
 	TextureAtlas spritesheet;
     OrthographicCamera camera;
-    final Piece ghost = new Piece(PieceArchetype.CONNECTOR_LONG, 0, 0);
-    final HexBoard board = new HexBoard();
+    final Piece ghost = new Piece(PieceArchetype.PATH_LONG, 0, 0);
+    final Area board = new Area();
 	
 	@Override
 	public void create () {
@@ -28,23 +28,23 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
         camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.zoom = 6f;
 
-        PieceArchetype.CONNECTOR_LONG.setTexture(spritesheet.findRegion("0_long_path"));
-        PieceArchetype.CONNECTOR_MED.setTexture(spritesheet.findRegion("0_med_path"));
-        PieceArchetype.CONNECTOR_SHORT.setTexture(spritesheet.findRegion("0_short_path"));
+        PieceArchetype.PATH_LONG.setTexture(spritesheet.findRegion("0_long_path"));
+        PieceArchetype.PATH_MED.setTexture(spritesheet.findRegion("0_med_path"));
+        PieceArchetype.PATH_SHORT.setTexture(spritesheet.findRegion("0_short_path"));
 
-        PieceArchetype.NODE_IN_0.setTexture(spritesheet.findRegion("node_in_C"));
-        PieceArchetype.NODE_IN_1.setTexture(spritesheet.findRegion("node_in_D"));
-        PieceArchetype.NODE_IN_2.setTexture(spritesheet.findRegion("node_in_E"));
-        PieceArchetype.NODE_IN_3.setTexture(spritesheet.findRegion("node_in_F"));
-        PieceArchetype.NODE_IN_4.setTexture(spritesheet.findRegion("node_in_A"));
-        PieceArchetype.NODE_IN_5.setTexture(spritesheet.findRegion("node_in_B"));
+        PieceArchetype.ROOM_IN_0.setTexture(spritesheet.findRegion("node_in_C"));
+        PieceArchetype.ROOM_IN_1.setTexture(spritesheet.findRegion("node_in_D"));
+        PieceArchetype.ROOM_IN_2.setTexture(spritesheet.findRegion("node_in_E"));
+        PieceArchetype.ROOM_IN_3.setTexture(spritesheet.findRegion("node_in_F"));
+        PieceArchetype.ROOM_IN_4.setTexture(spritesheet.findRegion("node_in_A"));
+        PieceArchetype.ROOM_IN_5.setTexture(spritesheet.findRegion("node_in_B"));
 
-        PieceArchetype.NODE_OUT_0.setTexture(spritesheet.findRegion("node_out_C"));
-        PieceArchetype.NODE_OUT_1.setTexture(spritesheet.findRegion("node_out_D"));
-        PieceArchetype.NODE_OUT_2.setTexture(spritesheet.findRegion("node_out_E"));
-        PieceArchetype.NODE_OUT_3.setTexture(spritesheet.findRegion("node_out_F"));
-        PieceArchetype.NODE_OUT_4.setTexture(spritesheet.findRegion("node_out_A"));
-        PieceArchetype.NODE_OUT_5.setTexture(spritesheet.findRegion("node_out_B"));
+        PieceArchetype.ROOM_OUT_0.setTexture(spritesheet.findRegion("node_out_C"));
+        PieceArchetype.ROOM_OUT_1.setTexture(spritesheet.findRegion("node_out_D"));
+        PieceArchetype.ROOM_OUT_2.setTexture(spritesheet.findRegion("node_out_E"));
+        PieceArchetype.ROOM_OUT_3.setTexture(spritesheet.findRegion("node_out_F"));
+        PieceArchetype.ROOM_OUT_4.setTexture(spritesheet.findRegion("node_out_A"));
+        PieceArchetype.ROOM_OUT_5.setTexture(spritesheet.findRegion("node_out_B"));
     }
 
 	@Override
@@ -75,23 +75,23 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
                 break;
             case Input.Keys.NUM_1:
                 placing = true;
-                ghost.type = PieceArchetype.CONNECTOR_LONG;
+                ghost.type = PieceArchetype.PATH_LONG;
                 break;
             case Input.Keys.NUM_2:
                 placing = true;
-                ghost.type = PieceArchetype.CONNECTOR_MED;
+                ghost.type = PieceArchetype.PATH_MED;
                 break;
             case Input.Keys.NUM_3:
                 placing = true;
-                ghost.type = PieceArchetype.CONNECTOR_SHORT;
+                ghost.type = PieceArchetype.PATH_SHORT;
                 break;
             case Input.Keys.NUM_4:
                 placing = true;
-                ghost.type = PieceArchetype.NODE_IN_4;
+                ghost.type = PieceArchetype.ROOM_IN_4;
                 break;
             case Input.Keys.NUM_5:
                 placing = true;
-                ghost.type = PieceArchetype.NODE_IN_5;
+                ghost.type = PieceArchetype.ROOM_IN_5;
 
                 break;
         }
