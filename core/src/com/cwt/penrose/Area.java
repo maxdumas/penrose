@@ -1,6 +1,7 @@
 package com.cwt.penrose;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 
 import java.util.*;
 
@@ -10,10 +11,27 @@ import java.util.*;
 public class Area {
     final List<Piece> pieces = new ArrayList<Piece>();
     final HashMap<Piece, Piece[]> adj = new HashMap<Piece, Piece[]>();
+    final int ownerId;
+
+    public Area(int ownerId) {
+        this.ownerId = ownerId;
+    }
 
     public void draw(SpriteBatch batch) {
         for (Piece piece : pieces)
             piece.draw(batch);
+    }
+
+    public Piece getPiece(int x, int y) {
+        int r = MathUtils.round((Piece.SQRT_3 * x - y) / (3f * Piece.RADIUS));
+        int g = MathUtils.round((-Piece.SQRT_3 * x - y) / (3f * Piece.RADIUS));
+        int b = -(r + g);
+
+        for(Piece p : pieces)
+            if(p.r == r && p.g == g && p.b == b)
+                return p;
+
+        return null;
     }
 
     // returns false if placement failed
@@ -62,7 +80,7 @@ public class Area {
         adj.put(p, n);
     }
 
-    private void removePiece(Piece p) {
+    public void removePiece(Piece p) {
         pieces.remove(p);
         Piece[] n = adj.get(p);
         if(n == null) return;
@@ -116,5 +134,21 @@ public class Area {
                 }
         }
         return true;
+    }
+
+    public int getCenterX() {
+        int sumX = 0;
+        for(Piece p : pieces) {
+            sumX += p.x;
+        }
+        return sumX / pieces.size();
+    }
+
+    public int getCenterY() {
+        int sumY = 0;
+        for(Piece p : pieces) {
+            sumY += p.y;
+        }
+        return sumY / pieces.size();
     }
 }

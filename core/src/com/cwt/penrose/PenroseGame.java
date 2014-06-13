@@ -11,17 +11,22 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector3;
 
 public class PenroseGame extends ApplicationAdapter implements InputProcessor {
-    boolean rightDown = false, placing = false;
+    public static final int NUM_PLAYERS = 2;
+    boolean rightDown = false, placing = false, reconfiguring = false;
 
     SpriteBatch batch;
 	TextureAtlas spritesheet;
     OrthographicCamera camera;
-    final Piece ghost = new Piece(PieceArchetype.PATH_LONG, 0, 0);
-    final Area board = new Area();
+    final Piece ghost = new Piece(PieceArchetype.NONE, 0, 0);
+    final Area[] areas = new Area[NUM_PLAYERS];
+
+    int activePlayer = 0, ap = 2;
 	
 	@Override
 	public void create () {
         Gdx.input.setInputProcessor(this);
+
+        for(int i = 0; i < NUM_PLAYERS; ++i) areas[i] = new Area(i);
 
         batch = new SpriteBatch();
         spritesheet = new TextureAtlas("sprite_sheet.txt");
@@ -56,8 +61,9 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
         batch.setProjectionMatrix(camera.combined);
 		batch.begin();
         // Display things here
-        board.draw(batch);
-        if(placing)
+        for(Area a : areas)
+            a.draw(batch);
+        if(placing || reconfiguring)
             ghost.draw(batch);
 		batch.end();
 	}
@@ -74,25 +80,24 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
                 Gdx.app.exit();
                 break;
             case Input.Keys.NUM_1:
-                placing = true;
+                placing = !placing;
                 ghost.type = PieceArchetype.PATH_LONG;
                 break;
             case Input.Keys.NUM_2:
-                placing = true;
+                placing = !placing;
                 ghost.type = PieceArchetype.PATH_MED;
                 break;
             case Input.Keys.NUM_3:
-                placing = true;
+                placing = !placing;
                 ghost.type = PieceArchetype.PATH_SHORT;
                 break;
             case Input.Keys.NUM_4:
-                placing = true;
+                placing = !placing;
                 ghost.type = PieceArchetype.ROOM_IN_4;
                 break;
             case Input.Keys.NUM_5:
-                placing = true;
+                placing = !placing;
                 ghost.type = PieceArchetype.ROOM_IN_5;
-
                 break;
         }
 
@@ -110,24 +115,56 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        Vector3 worldCoords = camera.unproject(new Vector3(screenX, screenY, 0f));
+        int x = (int)worldCoords.x, y = (int)worldCoords.y;
+
         switch(button) {
             case Input.Buttons.RIGHT:
                 rightDown = true;
                 break;
             case Input.Buttons.LEFT:
-                if(placing) {
-                    Vector3 worldCoords = camera.unproject(new Vector3(screenX, screenY, 0f));
-                    float x = worldCoords.x, y = worldCoords.y;
-                    placing = false;
+                if(placing || reconfiguring) {
                     // We now want to snap the ghost piece to the hex grid before we place it
-                    ghost.setPos((int) x, (int) y);
+                    ghost.setPos(x, y);
                     ghost.snapToHex();
-                    System.out.println("Attempting to place ghost at (" + ghost.r + ", " + ghost.g + ", " + ghost.b + ")...");
-                    board.placePiece(ghost);
+
+                    boolean placed = areas[activePlayer].placePiece(ghost);
+                    if(!placed && ap == 1) { // AP of 1 signifies that first piece has already been placed so we are allowed to place on other areas
+                        for(int i = 0; i < NUM_PLAYERS; ++i)
+                            if(i != activePlayer && areas[i].placePiece(ghost)) {
+                                --ap;
+                                break;
+                            }
+                    } else if(placed) {
+                        if(reconfiguring) ap -= 2;
+                        else --ap;
+                    }
+                    placing = reconfiguring = false;
+                    ghost.type = PieceArchetype.NONE;
+                } else if(!reconfiguring) {
+                    // We want to select a piece and move it, disallowing rotation.
+                    if (true) { // We only allow reconfiguring if it is the only move occurring this turn
+                        Piece selection = areas[activePlayer].getPiece(x, y);
+                        if (selection != null) {
+                            reconfiguring = true;
+                            ghost.type = selection.type;
+                            ghost.rotationIndex = selection.rotationIndex;
+                            areas[activePlayer].removePiece(selection);
+                        }
+                    }
                 }
                 break;
             case Input.Buttons.MIDDLE:
-                ghost.rotate(true);
+                if(placing && !reconfiguring) {
+                    ghost.rotate(true);
+                } else if (!placing && !reconfiguring) {
+                    // We want to rotate the piece under the mouse.
+                    Piece selection = areas[activePlayer].getPiece(x, y);
+                    if(selection != null) {
+                        selection.rotate(true);
+
+                    }
+                }
         }
 
         return true;
@@ -154,7 +191,7 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
     public boolean mouseMoved(int screenX, int screenY) {
         Vector3 worldCoords = camera.unproject(new Vector3(screenX, screenY, 0f));
         float x = worldCoords.x, y = worldCoords.y;
-        if(placing) {
+        if(placing || reconfiguring) {
             ghost.x = (int)x;
             ghost.y = (int)y;
         }

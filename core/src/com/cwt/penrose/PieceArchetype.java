@@ -9,6 +9,8 @@ import java.util.HashSet;
  * Created by Max on 5/29/2014.
  */
 public enum PieceArchetype {
+    NONE(null),
+
     PATH_LONG(new EdgeType[] {EdgeType.NONE, EdgeType.ANY, EdgeType.NONE, EdgeType.NONE, EdgeType.ANY, EdgeType.NONE}), // Long connector has edges 1 and 4 passable
     PATH_MED(new EdgeType[] {EdgeType.NONE, EdgeType.NONE, EdgeType.ANY, EdgeType.NONE, EdgeType.ANY, EdgeType.NONE}), // Medium connector has edges 2 and 4 passable
     PATH_SHORT(new EdgeType[] {EdgeType.NONE, EdgeType.NONE, EdgeType.NONE, EdgeType.NONE, EdgeType.ANY, EdgeType.ANY}), // Short connector has edges 4 and 5 passable

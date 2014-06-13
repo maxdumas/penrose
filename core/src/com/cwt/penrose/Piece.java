@@ -8,9 +8,9 @@ import com.badlogic.gdx.math.MathUtils;
  */
 public class Piece {
     // Constants
-    private static final float ROT_INTERVAL = 60.0f;
-    private static final float SQRT_3 = 1.732050807568877293527f;
-    private static final float RADIUS = 331 / 2f;
+    public static final float ROT_INTERVAL = 60.0f;
+    public static final float SQRT_3 = 1.732050807568877293527f;
+    public static final float RADIUS = 331 / 2f;
     // Table containing coordinate offsets for pieces adjacent to each of a given piece's 6 edges
     private static final int[][] OFFSET_TABLE = new int[][] { // We count edges from 0 to five, starting at rightmost edge
             new int[]{+1, -1, +0}, // Rightmost edge
@@ -47,7 +47,7 @@ public class Piece {
     }
 
     public void rotate(boolean ccw) {
-        if(PieceArchetype.ROOMS.contains(this.type)) return;
+        if(PieceArchetype.isRoom(this)) return;
 
         if(ccw)
             rotationIndex = (rotationIndex + 1) % 6;
@@ -61,29 +61,28 @@ public class Piece {
     public void setPos(int nx, int ny) {
         x = nx;
         y = ny;
-
-        r = MathUtils.round((SQRT_3 * x - y) / (3f * RADIUS));
-        g = MathUtils.round((-SQRT_3 * x - y) / (3f * RADIUS));
-        b = -(r + g);
+        calcRGB();
     }
 
     public void setX(int nx) {
         x = nx;
-        r = MathUtils.round((SQRT_3 * x - y) / (3f * RADIUS));
-        g = MathUtils.floor((-SQRT_3 * x - y) / (3f * RADIUS));
-        b = -(r + g);
+        calcRGB();
     }
 
     public void setY(int ny) {
         y = ny;
-        r = MathUtils.round((SQRT_3 * x - y) / (3f * RADIUS));
-        g = MathUtils.round((-SQRT_3 * x - y) / (3f * RADIUS));
-        b = -(r + g);
+        calcRGB();
     }
 
     public void snapToHex() {
         x = MathUtils.round(SQRT_3 * RADIUS * (b / 2f + r));
         y = MathUtils.round(3f / 2f * RADIUS * b);
+    }
+
+    private void calcRGB() {
+        r = MathUtils.round((SQRT_3 * x - y) / (3f * RADIUS));
+        g = MathUtils.round((-SQRT_3 * x - y) / (3f * RADIUS));
+        b = -(r + g);
     }
 
     /**
