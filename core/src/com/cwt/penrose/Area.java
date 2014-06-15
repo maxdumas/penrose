@@ -35,9 +35,9 @@ public class Area {
     }
 
     // returns false if placement failed
-    public boolean placePiece(Piece newPiece) {
+    public boolean placePiece(Piece newPiece, int playerId) {
         Piece p = new Piece(newPiece);
-        if (pieces.isEmpty()) {
+        if (ownerId == playerId && pieces.isEmpty() && PieceArchetype.isRoom(newPiece)) {
             addPiece(p, new Piece[6]);
             return true;
         }
@@ -127,7 +127,7 @@ public class Area {
                     // unless w is the parent of v, in which case, false alarm!
                     else if (visited.get(v) != w) {
                         if (nRooms == 3) { // All 3 rooms are connected in a cycle! That means victory!
-                            System.out.println("I WIN. YES!@!!!@#$@$");
+                            System.out.println("I WIN. YES!@!!!@#$@$ I, PLAYER " + ownerId + " WIN");
                             return true;
                         } else return false;
                     }
@@ -137,6 +137,8 @@ public class Area {
     }
 
     public int getCenterX() {
+        if(pieces.size() == 0) return 0;
+
         int sumX = 0;
         for(Piece p : pieces) {
             sumX += p.x;
@@ -145,6 +147,8 @@ public class Area {
     }
 
     public int getCenterY() {
+        if(pieces.size() == 0) return 0;
+
         int sumY = 0;
         for(Piece p : pieces) {
             sumY += p.y;

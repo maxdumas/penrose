@@ -31,7 +31,7 @@ public enum PieceArchetype {
     ROOM_OUT_4(ROOM_IN_0.edges, 4), // Corresponds to sprite node_out_A
     ROOM_OUT_5(ROOM_IN_0.edges, 5); // Corresponds to sprite node_out_B
 
-    public static final HashSet<PieceArchetype> CONNECTORS = new HashSet<PieceArchetype>(Arrays.asList(new PieceArchetype[] {PATH_LONG, PATH_MED, PATH_SHORT}));
+    public static final HashSet<PieceArchetype> PATHS = new HashSet<PieceArchetype>(Arrays.asList(new PieceArchetype[] {PATH_LONG, PATH_MED, PATH_SHORT}));
     public static final HashSet<PieceArchetype> IN_ROOMS = new HashSet<PieceArchetype>(
             Arrays.asList(new PieceArchetype[] {ROOM_IN_0, ROOM_IN_1, ROOM_IN_2, ROOM_IN_3, ROOM_IN_4, ROOM_IN_5}));
     public static final HashSet<PieceArchetype> OUT_ROOMS = new HashSet<PieceArchetype>(
@@ -68,5 +68,5 @@ public enum PieceArchetype {
 
     public static boolean isRoom(Piece p) { return ROOMS.contains(p.type); }
 
-    public static boolean isPath(Piece p) { return CONNECTORS.contains(p.type); }
+    public static boolean isPath(Piece p) { return PATHS.contains(p.type); }
 }
