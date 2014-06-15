@@ -59,7 +59,7 @@ public class Player {
         int x = (int) uiCoords.x, y = (int) uiCoords.y;
 
         for(Piece p : pathHand)
-            if(p.x < x && x < p.x + p.type.width && p.y < y && y < p.y + p.type.height)
+            if(p.x - p.type.centerX <= x && x <= p.x + p.type.centerX && p.y - p.type.centerY< y && y < p.y + p.type.centerY)
                 return p;
 
         return null;
@@ -70,7 +70,7 @@ public class Player {
         int x = (int) uiCoords.x, y = (int) uiCoords.y;
 
         for(Piece p : roomHand)
-            if(p.x < x && x < p.x + p.type.width && p.y < y && y < p.y + p.type.height)
+            if(p.x - p.type.centerX <= x && x <= p.x + p.type.centerX && p.y - p.type.centerY< y && y < p.y + p.type.centerY)
                 return p;
 
         return null;

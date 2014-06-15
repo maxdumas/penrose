@@ -8,12 +8,11 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 
 public class PenroseGame extends ApplicationAdapter implements InputProcessor {
     public static final int NUM_PLAYERS = 2;
-    boolean rightDown = false, placing = false, reconfiguring = false;
+    boolean rightDown = false, placing = false, reconfiguring = false, pieceDiscarded = false;
 
     SpriteBatch batch;
 	TextureAtlas spritesheet;
@@ -68,6 +67,7 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
             activePlayer = (activePlayer + 1) % NUM_PLAYERS;
             sceneCamera.position.set(areas[activePlayer].getCenterX(), areas[activePlayer].getCenterY(), 0f);
             ap = 2;
+            pieceDiscarded = false;
         }
         sceneCamera.update();
 		Gdx.gl.glClearColor(0.8f, 0.8f, 0.9f, 1.0f);
@@ -88,42 +88,14 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
 
     @Override
     public boolean keyDown(int keycode) {
-        return false;
+        if(keycode == Input.Keys.ESCAPE) Gdx.app.exit();
+
+        return true;
     }
 
     @Override
     public boolean keyUp(int keycode) {
-        switch(keycode) {
-            case Input.Keys.ESCAPE:
-                Gdx.app.exit();
-                break;
-            case Input.Keys.NUM_1:
-                placing = !placing;
-                ghost.type = PieceArchetype.PATH_LONG;
-                break;
-            case Input.Keys.NUM_2:
-                placing = !placing;
-                ghost.type = PieceArchetype.PATH_MED;
-                break;
-            case Input.Keys.NUM_3:
-                placing = !placing;
-                ghost.type = PieceArchetype.PATH_SHORT;
-                break;
-            case Input.Keys.NUM_4:
-                placing = !placing;
-                ghost.type = PieceArchetype.ROOM_IN_4;
-                break;
-            case Input.Keys.NUM_5:
-                placing = !placing;
-                ghost.type = PieceArchetype.ROOM_IN_5;
-                break;
-        }
-
-        if(placing) {
-            ghost.rotationIndex = 0;
-            mouseMoved(Gdx.input.getX(), Gdx.input.getY());
-        }
-        return true;
+        return false;
     }
 
     @Override
@@ -175,11 +147,13 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
                         // calculate which piece was chosen, set ghost to that, remove that piece from roomHand
                         ghost.type = roomSelection.type;
                         ghost.setPos(x, y);
+                        ghost.rotationIndex = 0;
                         players[activePlayer].roomHand.remove(roomSelection);
                         placing = true;
                     } else if(pathSelection != null) {
                         ghost.type = pathSelection.type;
                         ghost.setPos(x, y);
+                        ghost.rotationIndex = 0;
                         players[activePlayer].pathHand.remove(pathSelection);
                         placing = true;
                     }
@@ -197,7 +171,12 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
                 }
                 break;
             case Input.Buttons.MIDDLE:
-                if(placing && !reconfiguring) {
+                Piece pathSelection = players[activePlayer].selectPath(screenX, screenY);
+                if(pathSelection != null && !pieceDiscarded) {
+                    players[activePlayer].pathHand.remove(pathSelection);
+                    pieceDiscarded = true;
+                }
+                else if(placing && !reconfiguring) {
                     ghost.rotate(true);
                 } else if (!placing && !reconfiguring) {
                     // We want to rotate the piece under the mouse.
