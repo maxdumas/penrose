@@ -2,108 +2,108 @@ sprite_sheet.png
 format: RGBA8888
 filter: Linear,Linear
 repeat: none
-0_long_path
+path_long
   rotate: false
   xy: 2, 2
   size: 295, 331
   orig: 295, 331
   offset: 0, 0
   index: -1
-0_med_path
+path_med
   rotate: false
   xy: 299, 2
   size: 295, 331
   orig: 295, 331
   offset: 0, 0
   index: -1
-0_short_path
+path_short
   rotate: false
   xy: 596, 2
   size: 295, 331
   orig: 295, 331
   offset: 0, 0
   index: -1
-node_in_A
+room_in_0
   rotate: false
   xy: 893, 2
   size: 295, 331
   orig: 295, 331
   offset: 0, 0
-  index: -1
-node_in_B
+  index: 0
+room_in_1
   rotate: false
   xy: 1190, 2
   size: 295, 331
   orig: 295, 331
   offset: 0, 0
-  index: -1
-node_in_C
+  index: 1
+room_in_2
   rotate: false
   xy: 2, 335
   size: 295, 331
   orig: 295, 331
   offset: 0, 0
-  index: -1
-node_in_D
+  index: 2
+room_in_3
   rotate: false
   xy: 299, 335
   size: 295, 331
   orig: 295, 331
   offset: 0, 0
-  index: -1
-node_in_E
+  index: 3
+room_in_4
   rotate: false
   xy: 596, 335
   size: 295, 331
   orig: 295, 331
   offset: 0, 0
-  index: -1
-node_in_F
+  index: 4
+room_in_5
   rotate: false
   xy: 893, 335
   size: 295, 331
   orig: 295, 331
   offset: 0, 0
-  index: -1
-node_out_A
+  index: 5
+room_out_0
   rotate: false
   xy: 1190, 335
   size: 295, 331
   orig: 295, 331
   offset: 0, 0
-  index: -1
-node_out_B
+  index: 0
+room_out_1
   rotate: false
   xy: 2, 668
   size: 295, 331
   orig: 295, 331
   offset: 0, 0
-  index: -1
-node_out_C
+  index: 1
+room_out_2
   rotate: false
   xy: 299, 668
   size: 295, 331
   orig: 295, 331
   offset: 0, 0
-  index: -1
-node_out_D
+  index: 2
+room_out_3
   rotate: false
   xy: 596, 668
   size: 295, 331
   orig: 295, 331
   offset: 0, 0
-  index: -1
-node_out_E
+  index: 3
+room_out_4
   rotate: false
   xy: 893, 668
   size: 295, 331
   orig: 295, 331
   offset: 0, 0
-  index: -1
-node_out_F
+  index: 4
+room_out_5
   rotate: false
   xy: 1190, 668
   size: 295, 331
   orig: 295, 331
   offset: 0, 0
-  index: -1
+  index: 5

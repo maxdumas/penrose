@@ -1,5 +1,6 @@
 package com.cwt.penrose;
 
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 import java.util.Arrays;
@@ -9,8 +10,6 @@ import java.util.HashSet;
  * Created by Max on 5/29/2014.
  */
 public enum PieceArchetype {
-    NONE(null),
-
     PATH_LONG(new EdgeType[] {EdgeType.NONE, EdgeType.ANY, EdgeType.NONE, EdgeType.NONE, EdgeType.ANY, EdgeType.NONE}), // Long connector has edges 1 and 4 passable
     PATH_MED(new EdgeType[] {EdgeType.NONE, EdgeType.NONE, EdgeType.ANY, EdgeType.NONE, EdgeType.ANY, EdgeType.NONE}), // Medium connector has edges 2 and 4 passable
     PATH_SHORT(new EdgeType[] {EdgeType.NONE, EdgeType.NONE, EdgeType.NONE, EdgeType.NONE, EdgeType.ANY, EdgeType.ANY}), // Short connector has edges 4 and 5 passable
@@ -69,4 +68,19 @@ public enum PieceArchetype {
     public static boolean isRoom(Piece p) { return ROOMS.contains(p.type); }
 
     public static boolean isPath(Piece p) { return PATHS.contains(p.type); }
+
+    public static boolean init(TextureAtlas a) {
+        boolean success = true;
+        for(PieceArchetype p : values()) {
+            String fileName = p.name().toLowerCase();
+            TextureRegion t = a.findRegion(fileName);
+            if(t == null) {
+                System.out.println("Sprite named \"" + fileName + "\" not found in provided TextureAtlas. PieceArchetype initialization failed.");
+                success = false;
+            }
+            p.setTexture(t);
+        }
+
+        return success;
+    }
 }

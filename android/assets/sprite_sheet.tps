@@ -172,21 +172,21 @@
         </struct>
         <key>fileList</key>
         <array>
-            <filename>0_short_path.png</filename>
-            <filename>0_long_path.png</filename>
-            <filename>0_med_path.png</filename>
-            <filename>node_in_F.png</filename>
-            <filename>node_in_A.png</filename>
-            <filename>node_in_B.png</filename>
-            <filename>node_in_C.png</filename>
-            <filename>node_in_D.png</filename>
-            <filename>node_in_E.png</filename>
-            <filename>node_out_A.png</filename>
-            <filename>node_out_B.png</filename>
-            <filename>node_out_C.png</filename>
-            <filename>node_out_D.png</filename>
-            <filename>node_out_E.png</filename>
-            <filename>node_out_F.png</filename>
+            <filename>path_short.png</filename>
+            <filename>room_in_0.png</filename>
+            <filename>room_in_1.png</filename>
+            <filename>room_in_2.png</filename>
+            <filename>room_in_3.png</filename>
+            <filename>room_in_4.png</filename>
+            <filename>room_in_5.png</filename>
+            <filename>room_out_0.png</filename>
+            <filename>room_out_1.png</filename>
+            <filename>room_out_2.png</filename>
+            <filename>room_out_3.png</filename>
+            <filename>room_out_4.png</filename>
+            <filename>room_out_5.png</filename>
+            <filename>path_long.png</filename>
+            <filename>path_med.png</filename>
         </array>
         <key>ignoreFileList</key>
         <array/>

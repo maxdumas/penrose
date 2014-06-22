@@ -17,7 +17,7 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
     SpriteBatch batch;
 	TextureAtlas spritesheet;
     OrthographicCamera sceneCamera;
-    final Piece ghost = new Piece(PieceArchetype.NONE, 0, 0);
+    final Piece ghost = new Piece(PieceArchetype.PATH_LONG, 0, 0);
     final Area[] areas = new Area[NUM_PLAYERS];
     final Player[] players = new Player[2];
 
@@ -28,30 +28,15 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
 	public void create () {
         Gdx.input.setInputProcessor(this);
 
+        for(int i = 0; i < NUM_PLAYERS; ++i) areas[i] = new Area(i);
+
         batch = new SpriteBatch();
         spritesheet = new TextureAtlas("sprite_sheet.txt");
         sceneCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         sceneCamera.zoom = zoomFactor;
 
-
-        PieceArchetype.PATH_LONG.setTexture(spritesheet.findRegion("0_long_path"));
-        PieceArchetype.PATH_MED.setTexture(spritesheet.findRegion("0_med_path"));
-        PieceArchetype.PATH_SHORT.setTexture(spritesheet.findRegion("0_short_path"));
-
-        PieceArchetype.ROOM_IN_0.setTexture(spritesheet.findRegion("node_in_C"));
-        PieceArchetype.ROOM_IN_1.setTexture(spritesheet.findRegion("node_in_D"));
-        PieceArchetype.ROOM_IN_2.setTexture(spritesheet.findRegion("node_in_E"));
-        PieceArchetype.ROOM_IN_3.setTexture(spritesheet.findRegion("node_in_F"));
-        PieceArchetype.ROOM_IN_4.setTexture(spritesheet.findRegion("node_in_A"));
-        PieceArchetype.ROOM_IN_5.setTexture(spritesheet.findRegion("node_in_B"));
-
-        PieceArchetype.ROOM_OUT_0.setTexture(spritesheet.findRegion("node_out_C"));
-        PieceArchetype.ROOM_OUT_1.setTexture(spritesheet.findRegion("node_out_D"));
-        PieceArchetype.ROOM_OUT_2.setTexture(spritesheet.findRegion("node_out_E"));
-        PieceArchetype.ROOM_OUT_3.setTexture(spritesheet.findRegion("node_out_F"));
-        PieceArchetype.ROOM_OUT_4.setTexture(spritesheet.findRegion("node_out_A"));
-        PieceArchetype.ROOM_OUT_5.setTexture(spritesheet.findRegion("node_out_B"));
-
+        PieceArchetype.init(spritesheet);
+        
         for(int i = 0; i < NUM_PLAYERS; ++i) {
             areas[i] = new Area(i);
             players[i] = new Player(i);
@@ -73,6 +58,7 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
 		Gdx.gl.glClearColor(0.8f, 0.8f, 0.9f, 1.0f);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+        batch.setProjectionMatrix(sceneCamera.combined);
 		batch.begin();
         // Display UI here
         Player currentPlayer = players[activePlayer];
@@ -138,7 +124,6 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
                             players[activePlayer].addPath(new Piece(ghost));
                     }
                     placing = reconfiguring = false;
-                    ghost.type = PieceArchetype.NONE;
                 } else {
                     Piece roomSelection = players[activePlayer].selectRoom(screenX, screenY);
                     Piece pathSelection = players[activePlayer].selectPath(screenX, screenY);
