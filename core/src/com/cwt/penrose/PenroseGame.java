@@ -12,48 +12,40 @@ import com.badlogic.gdx.math.Vector3;
 
 public class PenroseGame extends ApplicationAdapter implements InputProcessor {
     public static final int NUM_PLAYERS = 2;
-    boolean rightDown = false, placing = false, reconfiguring = false, pieceDiscarded = false;
+    boolean canPan = false, pieceDiscarded = false;
 
     SpriteBatch batch;
 	TextureAtlas spritesheet;
     OrthographicCamera sceneCamera;
-    final Piece ghost = new Piece(PieceArchetype.PATH_LONG, 0, 0);
+    final Piece ghost = new Piece(PieceType.PATH_LONG, 0, 0);
     final Area[] areas = new Area[NUM_PLAYERS];
-    final Player[] players = new Player[2];
+    final PlayerHand[] playerHands = new PlayerHand[2];
 
     int activePlayer = 0, ap = 2;
+    PlayerState state = PlayerState.SELECTING;
     static final float zoomFactor = 6f;
 	
 	@Override
 	public void create () {
         Gdx.input.setInputProcessor(this);
 
-        for(int i = 0; i < NUM_PLAYERS; ++i) areas[i] = new Area(i);
-
         batch = new SpriteBatch();
         spritesheet = new TextureAtlas("sprite_sheet.txt");
         sceneCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         sceneCamera.zoom = zoomFactor;
 
-        PieceArchetype.init(spritesheet);
+        PieceType.init(spritesheet);
         
         for(int i = 0; i < NUM_PLAYERS; ++i) {
             areas[i] = new Area(i);
-            players[i] = new Player(i);
-            players[i].setupPathHand(true);
-            players[i].setupRoomHand(true);
+            playerHands[i] = new PlayerHand(i);
+            playerHands[i].setupPathHand(true);
+            playerHands[i].setupRoomHand(true);
         }
     }
 
 	@Override
 	public void render () {
-        if(ap <= 0) {
-            players[activePlayer].setupPathHand(true);
-            activePlayer = (activePlayer + 1) % NUM_PLAYERS;
-            sceneCamera.position.set(areas[activePlayer].getCenterX(), areas[activePlayer].getCenterY(), 0f);
-            ap = 2;
-            pieceDiscarded = false;
-        }
         sceneCamera.update();
 		Gdx.gl.glClearColor(0.8f, 0.8f, 0.9f, 1.0f);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -61,13 +53,12 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
         batch.setProjectionMatrix(sceneCamera.combined);
 		batch.begin();
         // Display UI here
-        Player currentPlayer = players[activePlayer];
-        currentPlayer.draw(batch);
+        PlayerHand currentPlayerHand = playerHands[activePlayer];
+        currentPlayerHand.draw(batch);
         batch.setProjectionMatrix(sceneCamera.combined);
         // Display things here
-        for(Area a : areas)
-            a.draw(batch);
-        if(placing || reconfiguring)
+        for(Area a : areas) a.draw(batch);
+        if(state != PlayerState.SELECTING)
             ghost.draw(batch);
 		batch.end();
 	}
@@ -81,6 +72,15 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
 
     @Override
     public boolean keyUp(int keycode) {
+        if(keycode == Input.Keys.SPACE && ap == 0) { // end turn
+            playerHands[activePlayer].setupPathHand(true);
+            activePlayer = (activePlayer + 1) % NUM_PLAYERS;
+            sceneCamera.position.set(areas[activePlayer].getCenterX(), areas[activePlayer].getCenterY(), 0f);
+            ap = 2;
+            pieceDiscarded = false;
+            state = PlayerState.SELECTING;
+        }
+
         return false;
     }
 
@@ -92,84 +92,67 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         Vector3 worldCoords = sceneCamera.unproject(new Vector3(screenX, screenY, 0f));
-        int x = (int)worldCoords.x, y = (int)worldCoords.y;
+        int x = (int) worldCoords.x, y = (int) worldCoords.y;
 
-        switch(button) {
-            case Input.Buttons.RIGHT:
-                rightDown = true;
+        switch (state) {
+            case SELECTING:
+                if (button == Input.Buttons.LEFT) {
+                    Piece selection = playerHands[activePlayer].select(screenX, screenY);
+                    if (selection != null) { // If the player selected a piece in their hand
+                        // calculate which piece was chosen, set ghost to that, remove that piece from roomHand
+                        state = PlayerState.PLACING;
+                        ghost.set(selection.type, x, y, 0);
+                    }
+                    // We want to select a piece and move it, disallowing rotation.
+                    else if (ap >= 2) { // If player AP is 2 or higher (reconfiguring costs 2 AP)
+                        selection = areas[activePlayer].getPiece(x, y);
+                        if (selection != null && selection.isPath()) {
+                            state = PlayerState.REPLACING;
+                            ghost.set(selection.type, selection.x, selection.y, selection.rotationIndex);
+                            areas[activePlayer].removePiece(selection);
+                        }
+                    }
+                } else if (button == Input.Buttons.MIDDLE) {
+                    // We want to rotate the piece under the mouse.
+                    Piece selection = areas[activePlayer].getPiece(x, y);
+                    if (selection != null) {
+                        selection.rotate(true);
+                        // Need to figure out how AP will work with this as well
+                    } else {
+                        Piece pathSelection = playerHands[activePlayer].selectPath(screenX, screenY);
+                        if (pathSelection != null && !pieceDiscarded) {
+                            playerHands[activePlayer].pathHand.remove(pathSelection);
+                            pieceDiscarded = true;
+                        }
+                    }
+                }
                 break;
-            case Input.Buttons.LEFT:
-                if(placing || reconfiguring) {
+            default:
+                if (button == Input.Buttons.LEFT) {
                     // We now want to snap the ghost piece to the hex grid before we place it
                     ghost.setPos(x, y);
                     ghost.snapToHex();
 
                     boolean placed = areas[activePlayer].placePiece(ghost, activePlayer);
-                    if(!placed && ap == 1) { // AP of 1 signifies that first piece has already been placed so we are allowed to place on other areas
-                        for(int i = 0; i < NUM_PLAYERS; ++i)
-                            if(i != activePlayer && areas[i].placePiece(ghost, activePlayer)) {
+                    if (!placed && ap == 1) { // AP of 1 signifies that first piece has already been placed so we are allowed to place on other areas
+                        for (int i = 0; i < NUM_PLAYERS; ++i)
+                            if (i != activePlayer && areas[i].placePiece(ghost, activePlayer)) {
                                 placed = true;
                                 break;
                             }
                     }
-                    if(placed) {
-                        if(reconfiguring) ap -= 2;
+                    if (placed) {
+                        if (state == PlayerState.REPLACING) ap -= 2;
                         else --ap;
-                        players[activePlayer].setupPathHand(false);
+                        playerHands[activePlayer].setupPathHand(false);
                     } else {
                         ghost.rotationIndex = 0;
-                        if(PieceArchetype.isRoom(ghost))
-                            players[activePlayer].addRoom(new Piece(ghost));
-                        else if (PieceArchetype.isPath(ghost))
-                            players[activePlayer].addPath(new Piece(ghost));
+                        if (ghost.isRoom())
+                            playerHands[activePlayer].addRoom(new Piece(ghost));
+                        else if (ghost.isPath())
+                            playerHands[activePlayer].addPath(new Piece(ghost));
                     }
-                    placing = reconfiguring = false;
-                } else {
-                    Piece roomSelection = players[activePlayer].selectRoom(screenX, screenY);
-                    Piece pathSelection = players[activePlayer].selectPath(screenX, screenY);
-
-                    if(roomSelection != null) {
-                        // calculate which piece was chosen, set ghost to that, remove that piece from roomHand
-                        ghost.type = roomSelection.type;
-                        ghost.setPos(x, y);
-                        ghost.rotationIndex = 0;
-                        players[activePlayer].roomHand.remove(roomSelection);
-                        placing = true;
-                    } else if(pathSelection != null) {
-                        ghost.type = pathSelection.type;
-                        ghost.setPos(x, y);
-                        ghost.rotationIndex = 0;
-                        players[activePlayer].pathHand.remove(pathSelection);
-                        placing = true;
-                    }
-                    // We want to select a piece and move it, disallowing rotation.
-                    else if (ap >= 2) { // We only allow reconfiguring if it is the only move occurring this turn
-                        Piece selection = areas[activePlayer].getPiece(x, y);
-                        if (selection != null && !PieceArchetype.isRoom(selection)) {
-                            reconfiguring = true;
-                            ghost.type = selection.type;
-                            ghost.setPos(selection.x, selection.y);
-                            ghost.rotationIndex = selection.rotationIndex;
-                            areas[activePlayer].removePiece(selection);
-                        }
-                    }
-                }
-                break;
-            case Input.Buttons.MIDDLE:
-                Piece pathSelection = players[activePlayer].selectPath(screenX, screenY);
-                if(pathSelection != null && !pieceDiscarded) {
-                    players[activePlayer].pathHand.remove(pathSelection);
-                    pieceDiscarded = true;
-                }
-                else if(placing && !reconfiguring) {
-                    ghost.rotate(true);
-                } else if (!placing && !reconfiguring) {
-                    // We want to rotate the piece under the mouse.
-                    Piece selection = areas[activePlayer].getPiece(x, y);
-                    if(selection != null) {
-                        selection.rotate(true);
-                        // Need to figure out how AP will work with this as well
-                    }
+                    state = PlayerState.SELECTING;
                 }
         }
 
@@ -179,7 +162,7 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
         switch (button) {
-            case Input.Buttons.RIGHT: rightDown = false;
+            case Input.Buttons.RIGHT: canPan = false;
         }
 
         return true;
@@ -187,7 +170,7 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
 
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
-        if(rightDown)
+        if(canPan)
             sceneCamera.translate(-Gdx.input.getDeltaX() * sceneCamera.zoom, Gdx.input.getDeltaY() * sceneCamera.zoom);
 
         return true;
@@ -197,7 +180,7 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
     public boolean mouseMoved(int screenX, int screenY) {
         Vector3 worldCoords = sceneCamera.unproject(new Vector3(screenX, screenY, 0f));
         float x = worldCoords.x, y = worldCoords.y;
-        if(placing || reconfiguring) {
+        if(state != PlayerState.SELECTING) {
             ghost.x = (int)x;
             ghost.y = (int)y;
         }

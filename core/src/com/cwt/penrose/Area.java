@@ -3,15 +3,18 @@ package com.cwt.penrose;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Stack;
 
 /**
  * Created by Max on 6/5/2014.
  */
-public class Area {
-    final List<Piece> pieces = new ArrayList<Piece>();
-    final HashMap<Piece, Piece[]> adj = new HashMap<Piece, Piece[]>();
-    final int ownerId;
+class Area {
+    private final List<Piece> pieces = new ArrayList<Piece>();
+    private final HashMap<Piece, Piece[]> adj = new HashMap<Piece, Piece[]>();
+    private final int ownerId;
 
     public Area(int ownerId) {
         this.ownerId = ownerId;
@@ -37,7 +40,7 @@ public class Area {
     // returns false if placement failed
     public boolean placePiece(Piece newPiece, int playerId) {
         Piece p = new Piece(newPiece);
-        if (ownerId == playerId && pieces.isEmpty() && PieceArchetype.isRoom(newPiece)) {
+        if (ownerId == playerId && pieces.isEmpty() && PieceType.isRoom(newPiece)) {
             addPiece(p, new Piece[6]);
             return true;
         }
@@ -110,11 +113,11 @@ public class Area {
             Piece v = s.pop();
             Piece[] n = adj.get(v);
             for (int i = 0; i < 6; ++i)
-                if (n[i] != null) {
+                if (n[i] != null) { // Ensure that this side actually has a neighbor
                     Piece w = n[i];
-                    if (!visited.containsKey(w)) {
-                        if (PieceArchetype.isRoom(v)) outgoing = v.edgeType(i);
-                        if (PieceArchetype.isRoom(w)) {
+                    if (!visited.containsKey(w)) { // Presence in the map indicates that it was visited
+                        if (PieceType.isRoom(v)) outgoing = v.edgeType(i);
+                        if (PieceType.isRoom(w)) {
                             EdgeType incoming = w.edgeType((i + 3) % 6);
                             if (outgoing != EdgeType.ANY && outgoing == incoming)
                                 return false; // Edges are not pair correctly, so we're done here

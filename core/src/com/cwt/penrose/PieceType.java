@@ -9,7 +9,7 @@ import java.util.HashSet;
 /**
  * Created by Max on 5/29/2014.
  */
-public enum PieceArchetype {
+public enum PieceType {
     PATH_LONG(new EdgeType[] {EdgeType.NONE, EdgeType.ANY, EdgeType.NONE, EdgeType.NONE, EdgeType.ANY, EdgeType.NONE}), // Long connector has edges 1 and 4 passable
     PATH_MED(new EdgeType[] {EdgeType.NONE, EdgeType.NONE, EdgeType.ANY, EdgeType.NONE, EdgeType.ANY, EdgeType.NONE}), // Medium connector has edges 2 and 4 passable
     PATH_SHORT(new EdgeType[] {EdgeType.NONE, EdgeType.NONE, EdgeType.NONE, EdgeType.NONE, EdgeType.ANY, EdgeType.ANY}), // Short connector has edges 4 and 5 passable
@@ -30,23 +30,23 @@ public enum PieceArchetype {
     ROOM_OUT_4(ROOM_IN_0.edges, 4), // Corresponds to sprite node_out_A
     ROOM_OUT_5(ROOM_IN_0.edges, 5); // Corresponds to sprite node_out_B
 
-    public static final HashSet<PieceArchetype> PATHS = new HashSet<PieceArchetype>(Arrays.asList(new PieceArchetype[] {PATH_LONG, PATH_MED, PATH_SHORT}));
-    public static final HashSet<PieceArchetype> IN_ROOMS = new HashSet<PieceArchetype>(
-            Arrays.asList(new PieceArchetype[] {ROOM_IN_0, ROOM_IN_1, ROOM_IN_2, ROOM_IN_3, ROOM_IN_4, ROOM_IN_5}));
-    public static final HashSet<PieceArchetype> OUT_ROOMS = new HashSet<PieceArchetype>(
-            Arrays.asList(new PieceArchetype[] {ROOM_OUT_0, ROOM_OUT_1, ROOM_OUT_2, ROOM_OUT_3, ROOM_OUT_4, ROOM_OUT_5}));
-    public static final HashSet<PieceArchetype> ROOMS = new HashSet<PieceArchetype>(
-            Arrays.asList(new PieceArchetype[] {ROOM_IN_0, ROOM_IN_1, ROOM_IN_2, ROOM_IN_3, ROOM_IN_4, ROOM_IN_5, ROOM_OUT_0, ROOM_OUT_1, ROOM_OUT_2, ROOM_OUT_3, ROOM_OUT_4, ROOM_OUT_5}));
+    public static final HashSet<PieceType> PATHS = new HashSet<PieceType>(Arrays.asList(new PieceType[] {PATH_LONG, PATH_MED, PATH_SHORT}));
+    public static final HashSet<PieceType> IN_ROOMS = new HashSet<PieceType>(
+            Arrays.asList(new PieceType[] {ROOM_IN_0, ROOM_IN_1, ROOM_IN_2, ROOM_IN_3, ROOM_IN_4, ROOM_IN_5}));
+    public static final HashSet<PieceType> OUT_ROOMS = new HashSet<PieceType>(
+            Arrays.asList(new PieceType[] {ROOM_OUT_0, ROOM_OUT_1, ROOM_OUT_2, ROOM_OUT_3, ROOM_OUT_4, ROOM_OUT_5}));
+    public static final HashSet<PieceType> ROOMS = new HashSet<PieceType>(
+            Arrays.asList(new PieceType[] {ROOM_IN_0, ROOM_IN_1, ROOM_IN_2, ROOM_IN_3, ROOM_IN_4, ROOM_IN_5, ROOM_OUT_0, ROOM_OUT_1, ROOM_OUT_2, ROOM_OUT_3, ROOM_OUT_4, ROOM_OUT_5}));
 
     private TextureRegion texture;
     public int width, height, centerX, centerY;
     protected final EdgeType[] edges;
 
-    private PieceArchetype(EdgeType[] edges) {
+    private PieceType(EdgeType[] edges) {
         this.edges = edges;
     }
 
-    private PieceArchetype(EdgeType[] edges, int rot) {
+    private PieceType(EdgeType[] edges, int rot) {
         this.edges = new EdgeType[6];
         for(int i = 0; i < 6; ++i) {
             int j = (i + rot) % 6;
@@ -71,7 +71,7 @@ public enum PieceArchetype {
 
     public static boolean init(TextureAtlas a) {
         boolean success = true;
-        for(PieceArchetype p : values()) {
+        for(PieceType p : values()) {
             String fileName = p.name().toLowerCase();
             TextureRegion t = a.findRegion(fileName);
             if(t == null) {

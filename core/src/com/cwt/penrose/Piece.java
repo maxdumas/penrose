@@ -21,12 +21,12 @@ public class Piece {
             new int[]{+0, -1, +1}  // Top-right edge
     };
 
-    public PieceArchetype type;
+    public PieceType type;
     // It should be noted that any two of r, g, b are all that we require, but we keep
     // them all for simplicity
     public int rotationIndex, x, y, r, g, b;
 
-    public Piece(PieceArchetype type, int x, int y) {
+    public Piece(PieceType type, int x, int y) {
         setPos(x, y);
         this.type = type;
         rotationIndex = 0;
@@ -47,7 +47,7 @@ public class Piece {
     }
 
     public void rotate(boolean ccw) {
-        if(PieceArchetype.isRoom(this)) return;
+        if(PieceType.isRoom(this)) return;
 
         if(ccw)
             rotationIndex = (rotationIndex + 1) % 6;
@@ -56,6 +56,16 @@ public class Piece {
 
     public void translate(int dx, int dy) {
         setPos(x + dx, y + dy);
+    }
+
+    public void set(PieceType type, int x, int y, int rotationIndex) {
+        this.type = type;
+        setPos(x, y);
+        this.rotationIndex = rotationIndex;
+    }
+
+    public void set(Piece that) {
+        set(that.type, that.x, that.y, that.rotationIndex);
     }
 
     public void setPos(int nx, int ny) {
@@ -108,7 +118,7 @@ public class Piece {
      * @return
      */
     public int adjacentEdge(Piece other) {
-        if(PieceArchetype.isRoom(other) && PieceArchetype.isRoom(this))
+        if(PieceType.isRoom(other) && PieceType.isRoom(this))
             return -2;
         for(int e = 0; e < 6; ++e) { // Loop through all edges
             if(isEdgePassable(e)) {
@@ -125,5 +135,13 @@ public class Piece {
 
     protected int adjustForRotation(int k) {
         return ((k + rotationIndex) % 6);
+    }
+
+    public boolean isRoom() {
+        return PieceType.isRoom(this);
+    }
+
+    public boolean isPath() {
+        return PieceType.isPath(this);
     }
 }

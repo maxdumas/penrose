@@ -12,16 +12,16 @@ import java.util.List;
 /**
  * Created by max on 6/14/14.
  */
-public class Player {
+public class PlayerHand {
     private static final int PATH_HAND_SIZE = 4;
     private static final int ROOM_HAND_SIZE = 3;
 
-    int playerId;
+    final int playerId;
     final List<Piece> pathHand = new ArrayList<Piece>(PATH_HAND_SIZE);
     final List<Piece> roomHand = new ArrayList<Piece>(ROOM_HAND_SIZE);
-    OrthographicCamera uiCamera;
+    final OrthographicCamera uiCamera;
 
-    public Player(int playerId) {
+    public PlayerHand(int playerId) {
         this.playerId = playerId;
         uiCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         uiCamera.zoom = 6f;
@@ -29,51 +29,63 @@ public class Player {
     }
 
     public void setupPathHand(boolean refill) {
-        Object[] archetypes = PieceArchetype.PATHS.toArray();
+        Object[] archetypes = PieceType.PATHS.toArray();
         for (int i = 0; i < pathHand.size(); ++i) {
             Piece p = pathHand.get(i);
             p.setPos(5 + p.type.centerX, (int) (1.1f * i * p.type.height + p.type.centerY));
         }
         if(!refill) return;
         for (int i = pathHand.size(); i < PATH_HAND_SIZE; ++i) {
-            PieceArchetype p = (PieceArchetype) archetypes[MathUtils.random(archetypes.length - 1)];
+            PieceType p = (PieceType) archetypes[MathUtils.random(archetypes.length - 1)];
             pathHand.add(new Piece(p, 5 + p.centerX, (int) (1.1f * i * p.height + p.centerY)));
         }
     }
 
     public void setupRoomHand(boolean refill) {
-        Object[] archetypes = PieceArchetype.ROOMS.toArray();
+        Object[] archetypes = PieceType.ROOMS.toArray();
         for (int i = 0; i < roomHand.size(); ++i) {
             Piece p = roomHand.get(i);
             p.setPos((int) (Gdx.graphics.getWidth() * 6f - 5 - p.type.centerX), (int) (1.1f * i * p.type.height + p.type.centerY));
         }
         if(!refill) return;
         for (int i = roomHand.size(); i < ROOM_HAND_SIZE; ++i) {
-            PieceArchetype p = (PieceArchetype) archetypes[MathUtils.random(archetypes.length - 1)];
+            PieceType p = (PieceType) archetypes[MathUtils.random(archetypes.length - 1)];
             roomHand.add(new Piece(p, (int) (Gdx.graphics.getWidth() * 6f - 5 - p.centerX), (int) (1.1f * i * p.height + p.centerY)));
         }
+    }
+
+    public Piece select(float screenX, float screenY) {
+        Piece selection = selectPath(screenX, screenY);
+        if(selection == null) selection = selectRoom(screenX, screenY);
+        return selection;
     }
 
     public Piece selectPath(float screenX, float screenY) {
         Vector3 uiCoords = uiCamera.unproject(new Vector3(screenX, screenY, 0));
         int x = (int) uiCoords.x, y = (int) uiCoords.y;
-
+        Piece selection = null;
         for(Piece p : pathHand)
-            if(p.x - p.type.centerX <= x && x <= p.x + p.type.centerX && p.y - p.type.centerY< y && y < p.y + p.type.centerY)
-                return p;
+            if(p.x - p.type.centerX <= x && x <= p.x + p.type.centerX && p.y - p.type.centerY< y && y < p.y + p.type.centerY) {
+                selection = p;
+                break;
+            }
 
-        return null;
+        if(selection != null) pathHand.remove(selection);
+        return selection;
     }
 
     public Piece selectRoom(float screenX, float screenY) {
         Vector3 uiCoords = uiCamera.unproject(new Vector3(screenX, screenY, 0));
         int x = (int) uiCoords.x, y = (int) uiCoords.y;
+        Piece selection = null;
+        for (Piece p : roomHand)
+            if (p.x - p.type.centerX <= x && x <= p.x + p.type.centerX && p.y - p.type.centerY < y && y < p.y + p.type.centerY) {
+                selection = p;
+                break;
+            }
 
-        for(Piece p : roomHand)
-            if(p.x - p.type.centerX <= x && x <= p.x + p.type.centerX && p.y - p.type.centerY< y && y < p.y + p.type.centerY)
-                return p;
-
-        return null;
+        if(selection != null) roomHand.remove(selection);
+        return selection;
     }
 
     public void addRoom(Piece p) {
