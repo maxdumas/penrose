@@ -24,8 +24,9 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
     int activePlayer = 0, ap = 2;
     PlayerState state = PlayerState.SELECTING;
     static final float zoomFactor = 6f;
-	
-	@Override
+    private boolean invalidPiece;
+
+    @Override
 	public void create () {
         Gdx.input.setInputProcessor(this);
 
@@ -58,8 +59,8 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
         batch.setProjectionMatrix(sceneCamera.combined);
         // Display things here
         for(Area a : areas) a.draw(batch);
-        if(state != PlayerState.SELECTING)
-            ghost.draw(batch);
+        if(invalidPiece) batch.setColor(1.0f, 0f, 0f, 1f);
+        if(state != PlayerState.SELECTING || invalidPiece) ghost.draw(batch);
 		batch.end();
 	}
 
@@ -80,7 +81,6 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
             pieceDiscarded = false;
             state = PlayerState.SELECTING;
         }
-
         return false;
     }
 
@@ -98,13 +98,11 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
             case SELECTING:
                 if (button == Input.Buttons.LEFT) {
                     Piece selection = playerHands[activePlayer].select(screenX, screenY);
-                    if (selection != null) { // If the player selected a piece in their hand
-                        // calculate which piece was chosen, set ghost to that, remove that piece from roomHand
+                    if (selection != null && !invalidPiece) { // SELECTION FROM HAND
                         state = PlayerState.PLACING;
                         ghost.set(selection.type, x, y, 0);
                     }
-                    // We want to select a piece and move it, disallowing rotation.
-                    else if (ap >= 2) { // If player AP is 2 or higher (reconfiguring costs 2 AP)
+                    else if (ap >= 2) { // SELECTION OF EXISTING PIECE
                         selection = areas[activePlayer].getPiece(x, y);
                         if (selection != null && selection.isPath()) {
                             state = PlayerState.REPLACING;
@@ -114,45 +112,49 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
                     }
                 } else if (button == Input.Buttons.MIDDLE) {
                     // We want to rotate the piece under the mouse.
-                    Piece selection = areas[activePlayer].getPiece(x, y);
-                    if (selection != null) {
-                        selection.rotate(true);
+                    Piece selection = playerHands[activePlayer].selectPath(screenX, screenY);
+                    if (selection != null && !pieceDiscarded) { // DISCARDING FROM HAND
+                        playerHands[activePlayer].pathHand.remove(selection);
+                        pieceDiscarded = true;
+                    } else if (selection == null) { // ROTATION OF EXISTING PIECE
+                        selection = areas[activePlayer].getPiece(x, y);
+                        if (selection != null) selection.rotate(true);
                         // Need to figure out how AP will work with this as well
-                    } else {
-                        Piece pathSelection = playerHands[activePlayer].selectPath(screenX, screenY);
-                        if (pathSelection != null && !pieceDiscarded) {
-                            playerHands[activePlayer].pathHand.remove(pathSelection);
-                            pieceDiscarded = true;
-                        }
                     }
                 }
                 break;
             default:
                 if (button == Input.Buttons.LEFT) {
-                    // We now want to snap the ghost piece to the hex grid before we place it
+                    // Snap the ghost piece to the hex grid before we place it
                     ghost.setPos(x, y);
                     ghost.snapToHex();
 
-                    boolean placed = areas[activePlayer].placePiece(ghost, activePlayer);
-                    if (!placed && ap == 1) { // AP of 1 signifies that first piece has already been placed so we are allowed to place on other areas
-                        for (int i = 0; i < NUM_PLAYERS; ++i)
-                            if (i != activePlayer && areas[i].placePiece(ghost, activePlayer)) {
+                    // Attempt to place the desired piece on our area
+                    boolean placed = areas[activePlayer].addPieceIfValid(new Piece(ghost), activePlayer); // Verify that the placement is correct
+                    if (!placed && ap == 1) { // Couldn't place piece on our area, try other players if we have already placed a first piece
+                        for (int i = 0; i < NUM_PLAYERS; ++i) {
+                            if (i != activePlayer && areas[i].addPieceIfValid(new Piece(ghost), activePlayer)) {
                                 placed = true;
                                 break;
                             }
+                        }
                     }
-                    if (placed) {
+                    if (placed) { // Successfully placed the piece
                         if (state == PlayerState.REPLACING) ap -= 2;
                         else --ap;
                         playerHands[activePlayer].setupPathHand(false);
-                    } else {
-                        ghost.rotationIndex = 0;
-                        if (ghost.isRoom())
-                            playerHands[activePlayer].addRoom(new Piece(ghost));
-                        else if (ghost.isPath())
-                            playerHands[activePlayer].addPath(new Piece(ghost));
+                        state = PlayerState.SELECTING;
+                    } else { // Did not successfully place piece, leave it as a dummy and don't allow anything else to
+                        // happen until piece is placed correctly.
+                        invalidPiece = true;
+                        state = PlayerState.SELECTING;
                     }
-                    state = PlayerState.SELECTING;
+
+                    // TODO: Need to create system where a move can be made, THEN the move is checked for validity.
+                    // Player needs to be able to put pieces down at will. Their last move needs to be able to be undone
+                    // until their next move is performed or until they end their turn. Rotating and placing need
+                    // to be entirely separated, and need to not cost AP when being performed on a piece that has just
+                    // been placed.
                 }
         }
 
@@ -179,10 +181,10 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
         Vector3 worldCoords = sceneCamera.unproject(new Vector3(screenX, screenY, 0f));
-        float x = worldCoords.x, y = worldCoords.y;
+        int x = (int)worldCoords.x, y = (int)worldCoords.y;
         if(state != PlayerState.SELECTING) {
-            ghost.x = (int)x;
-            ghost.y = (int)y;
+            ghost.x = x;
+            ghost.y = y;
         }
         return true;
     }

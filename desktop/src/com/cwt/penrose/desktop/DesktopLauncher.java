@@ -7,8 +7,8 @@ import com.cwt.penrose.PenroseGame;
 public class DesktopLauncher {
 	public static void main (String[] arg) {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
-        config.width = 768;
-        config.height = 1024;
+        config.width = 800;
+        config.height = 600;
 		new LwjglApplication(new PenroseGame(), config);
 	}
 }

@@ -37,38 +37,6 @@ class Area {
         return null;
     }
 
-    // returns false if placement failed
-    public boolean placePiece(Piece newPiece, int playerId) {
-        Piece p = new Piece(newPiece);
-        if (ownerId == playerId && pieces.isEmpty() && PieceType.isRoom(newPiece)) {
-            addPiece(p, new Piece[6]);
-            return true;
-        }
-        boolean connectionMade = false;
-        Piece[] n = new Piece[6];
-        for (Piece q : pieces) {
-            // We don't want to be able to place any piece that blocks a connector
-            // So if there is any piece that is not mutually adjacent to our new piece , then
-            // this move is not valid.
-            if (q.adjacentEdge(p) >= 0) {
-                int pe = p.adjacentEdge(q);
-                if (pe >= 0) {
-                    connectionMade = true;
-                    n[pe] = q;
-                } else return false;
-            } else if (p.adjacentEdge(q) >= 0) return false;
-        }
-        if (connectionMade) {
-            addPiece(p, n);
-            if (!validate()) {
-                removePiece(p);
-                return false;
-            }
-            return true;
-        }
-        return false;
-    }
-
     /**
      *
      * @param p the piece to add
@@ -95,10 +63,43 @@ class Area {
     }
 
     /**
-     * Validates the current state of the board and checks if a victory condition has been met.
-     * @return
+     * Given a piece p, returns true if that piece is added to the area in a valid way,
+     * returns false if that piece could not be added to the area.
+     * @param p the piece to add
+     * @return true if the piece is a valid configuration and was thus added, false otherwise
      */
-    private boolean validate() {
+    public boolean addPieceIfValid(Piece p, int playerId) {
+        if (ownerId == playerId && pieces.isEmpty() && PieceType.isRoom(p)) {
+            addPiece(p, new Piece[6]);
+            return true;
+        }
+
+        Piece[] neighbors = new Piece[6];
+        for (Piece q : pieces) {
+            // We don't want to be able to place any piece that blocks a connector
+            // So if there is any piece that is not mutually adjacent to our new piece , then
+            // this move is not valid.
+            if (q.adjacentEdge(p) >= 0) { // Check if the two pieces share an adjacent edge
+                int pe = p.adjacentEdge(q);
+                if (pe >= 0) { // Ensure any connection is mutual
+                    neighbors[pe] = q;
+                } else return false;
+            } else if (p.adjacentEdge(q) >= 0) // Ensure any non-connection is mutual
+                return false;
+        }
+        addPiece(p, neighbors); // Piece passed preliminary validation, now validate it in the context of the larger area
+
+        if(!validate(playerId)) {
+            removePiece(p);
+            return false;
+        } else return true;
+    }
+
+    /**
+     * Validates the current state of the area and checks if a victory condition has been met.
+     * @return true if area state is valid, false otherwise.
+     */
+    public boolean validate(int playerId) {
         // The number of connected rooms (we always start with 1 room because the first piece is always a room
         int nRooms = 1;
         // The type of the edge of the last room from which we projected our search
@@ -120,7 +121,7 @@ class Area {
                         if (PieceType.isRoom(w)) {
                             EdgeType incoming = w.edgeType((i + 3) % 6);
                             if (outgoing != EdgeType.ANY && outgoing == incoming)
-                                return false; // Edges are not pair correctly, so we're done here
+                                return false; // Edges are not paired correctly, so we're done here
                             else ++nRooms; // Everything is good, so we've connected another room!
                         }
                         visited.put(w, v);

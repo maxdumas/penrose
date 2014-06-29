@@ -69,18 +69,14 @@ public enum PieceType {
 
     public static boolean isPath(Piece p) { return PATHS.contains(p.type); }
 
-    public static boolean init(TextureAtlas a) {
-        boolean success = true;
+    public static void init(TextureAtlas a) {
         for(PieceType p : values()) {
             String fileName = p.name().toLowerCase();
             TextureRegion t = a.findRegion(fileName);
-            if(t == null) {
-                System.out.println("Sprite named \"" + fileName + "\" not found in provided TextureAtlas. PieceArchetype initialization failed.");
-                success = false;
-            }
+            if(t == null)
+                throw new RuntimeException("Sprite named \"" + fileName + "\" not found in provided TextureAtlas. PieceArchetype initialization failed.");
+
             p.setTexture(t);
         }
-
-        return success;
     }
 }
