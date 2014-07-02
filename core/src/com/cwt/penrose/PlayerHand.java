@@ -54,13 +54,13 @@ public class PlayerHand {
         }
     }
 
-    public Piece select(float screenX, float screenY) {
-        Piece selection = selectPath(screenX, screenY);
-        if(selection == null) selection = selectRoom(screenX, screenY);
+    public Piece getPiece(float screenX, float screenY) {
+        Piece selection = getPath(screenX, screenY);
+        if(selection == null) selection = getRoom(screenX, screenY);
         return selection;
     }
 
-    public Piece selectPath(float screenX, float screenY) {
+    public Piece getPath(float screenX, float screenY) {
         Vector3 uiCoords = uiCamera.unproject(new Vector3(screenX, screenY, 0));
         int x = (int) uiCoords.x, y = (int) uiCoords.y;
         Piece selection = null;
@@ -69,12 +69,10 @@ public class PlayerHand {
                 selection = p;
                 break;
             }
-
-        if(selection != null) pathHand.remove(selection);
         return selection;
     }
 
-    public Piece selectRoom(float screenX, float screenY) {
+    public Piece getRoom(float screenX, float screenY) {
         Vector3 uiCoords = uiCamera.unproject(new Vector3(screenX, screenY, 0));
         int x = (int) uiCoords.x, y = (int) uiCoords.y;
         Piece selection = null;
@@ -83,9 +81,11 @@ public class PlayerHand {
                 selection = p;
                 break;
             }
-
-        if(selection != null) roomHand.remove(selection);
         return selection;
+    }
+
+    public boolean removePiece(Piece p) {
+        return pathHand.remove(p) || roomHand.remove(p);
     }
 
     public void addRoom(Piece p) {
