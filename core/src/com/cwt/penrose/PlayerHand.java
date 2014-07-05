@@ -17,8 +17,8 @@ public class PlayerHand {
     private static final int ROOM_HAND_SIZE = 3;
 
     final int playerId;
-    final List<Piece> pathHand = new ArrayList<Piece>(PATH_HAND_SIZE);
-    final List<Piece> roomHand = new ArrayList<Piece>(ROOM_HAND_SIZE);
+    public final List<Piece> pathHand = new ArrayList<Piece>(PATH_HAND_SIZE);
+    public final List<Piece> roomHand = new ArrayList<Piece>(ROOM_HAND_SIZE);
     final OrthographicCamera uiCamera;
 
     public PlayerHand(int playerId) {
@@ -98,6 +98,11 @@ public class PlayerHand {
         if(pathHand.size() >= PATH_HAND_SIZE) return;
         pathHand.add(p);
         setupPathHand(false);
+    }
+
+    public void addPiece(Piece p) {
+        if(p.isPath()) addPath(p);
+        else if(p.isRoom()) addRoom(p);
     }
 
     public void draw(SpriteBatch batch) {

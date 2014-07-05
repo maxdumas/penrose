@@ -3,6 +3,8 @@ package com.cwt.penrose;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Vector3;
+import com.cwt.penrose.commands.*;
+import com.cwt.penrose.misc.HexPoint;
 
 /**
  * Created by Max on 6/22/2014.
@@ -15,29 +17,32 @@ public enum PlayerState implements State<PlayerManager> {
             int x = (int) worldCoords.x, y = (int) worldCoords.y;
 
             if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+                HexPoint p = Piece.toHexPoint(x, y);
+                if(game.ghost.getHexCoords().equals(p))
+                    return new ReSelectionCommand(game, cpm);
+
+                boolean fromHand = true;
                 Piece selection = cpm.getHand().getPiece(Gdx.input.getX(), Gdx.input.getY());
                 if(selection == null) {
                     selection = cpm.getArea().getPiece(x, y);
                     if(selection == null) return null;
-                    else cpm.getArea().removePiece(selection);
+                    else fromHand = false;
                 }
-                else cpm.getHand().removePiece(selection);
 
-                game.ghost.set(selection.type, x, y, selection.rotationIndex);
-                cpm.setState(PLACING);
+                return new NewSelectionCommand(game, cpm, selection, fromHand);
 
             } else if (Gdx.input.isButtonPressed(Input.Buttons.MIDDLE)) {
                 // Discard a piece or rotate an existing piece.
                 Piece selection = cpm.getHand().getPiece(Gdx.input.getX(), Gdx.input.getY());
-                if(selection != null && !cpm.isPieceDiscarded()) { // Hand was selected
-                    cpm.getHand().pathHand.remove(selection); // Discard piece
-                    cpm.setPieceDiscarded(true);
-                } else {
+                if(selection != null && !cpm.isPieceDiscarded()) // Hand was selected
+                    return new DiscardCommand(cpm, selection);
+                else {
                     selection = cpm.getArea().getPiece(x, y);
-                    if(selection != null) { // Rotate
-                        selection.rotate(true);
-                        cpm.setLastPieceRotated(true);
-                    }
+                    if(selection != null && selection == game.ghost)  // Rotate
+                    // TODO: This should be allowed iff last piece is new or piece has not been moved this phase
+                    // Maybe check if phase already contains a movement action, and disallow if true?
+                    // Or check if the selection is the ghost, and deal with configuration case in some other way...?
+                        return new RotationCommand(selection, 1);
                 }
             }
 
@@ -45,42 +50,13 @@ public enum PlayerState implements State<PlayerManager> {
         }
 
     },
-    PLACING {
+    POSITIONING {
         public Command handleInput(PenroseGame game, PlayerManager cpm) {
             if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
-                // Attempt to place piece. If piece cannot be placed go into correcting mode
-                game.ghost.setPos(Gdx.input.getX(), Gdx.input.getY());
-                game.ghost.snapToHex();
-                boolean placed = cpm.getArea().addPieceIfValid(new Piece(game.ghost), cpm.getActivePlayer());
-                if(!placed && cpm.getAP() == 1) {
-                    for (int i = 0; i < cpm.numPlayers; ++i)
-                        if(i != cpm.getActivePlayer() && cpm.getArea().addPieceIfValid(new Piece(game.ghost), cpm.getActivePlayer())) {
-                            placed = true;
-                            break;
-                        }
-                }
-                if(placed) {
-                    cpm.changeAP(-1);
-                } else { // Piece placed incorrectly, not good
-                    cpm.setState(CORRECTING);
-                }
+                return new PositionCommand(game.ghost, Gdx.input.getX(), Gdx.input.getY());
             }
 
             return null;
         }
-
-    },
-    CORRECTING {
-        public Command handleInput(PenroseGame game, PlayerManager cpm) {
-            if(Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
-                // Only allow selection of invalid piece
-
-            } else if(Gdx.input.isButtonPressed(Input.Buttons.MIDDLE)) {
-                // Only allow rotation of invalid piece
-            }
-
-            return null;
-        }
-
     }
 }

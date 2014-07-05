@@ -2,15 +2,16 @@ package com.cwt.penrose;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
+import com.cwt.penrose.misc.HexPoint;
 
 /**
  * Created by Max on 5/29/2014.
  */
 public class Piece {
     // Constants
-    public static final float ROT_INTERVAL = 60.0f;
-    public static final float SQRT_3 = 1.732050807568877293527f;
-    public static final float RADIUS = 331 / 2f;
+    private static final float ROT_INTERVAL = 60.0f;
+    private static final float SQRT_3 = 1.732050807568877293527f;
+    private static final float RADIUS = 331 / 2f;
     // Table containing coordinate offsets for pieces adjacent to each of a given piece's 6 edges
     private static final int[][] OFFSET_TABLE = new int[][] { // We count edges from 0 to five, starting at rightmost edge
             new int[]{+1, -1, +0}, // Rightmost edge
@@ -47,11 +48,15 @@ public class Piece {
     }
 
     public void rotate(boolean ccw) {
+        rotate(ccw, 1);
+    }
+
+    public void rotate(boolean ccw, int amount) {
         if(PieceType.isRoom(this)) return;
 
         if(ccw)
-            rotationIndex = (rotationIndex + 1) % 6;
-        else rotationIndex = (rotationIndex - 1) % 6;
+            rotationIndex = (rotationIndex + amount) % 6;
+        else rotationIndex = (rotationIndex - amount) % 6;
     }
 
     public void translate(int dx, int dy) {
@@ -90,9 +95,10 @@ public class Piece {
     }
 
     private void calcRGB() {
-        r = MathUtils.round((SQRT_3 * x - y) / (3f * RADIUS));
-        g = MathUtils.round((-SQRT_3 * x - y) / (3f * RADIUS));
-        b = -(r + g);
+        HexPoint c = toHexPoint(x, y);
+        r = c.r;
+        g = c.g;
+        b = c.b;
     }
 
     /**
@@ -143,5 +149,17 @@ public class Piece {
 
     public boolean isPath() {
         return PieceType.isPath(this);
+    }
+
+    public HexPoint getHexCoords() {
+        return new HexPoint(r, g, b);
+    }
+
+    public static HexPoint toHexPoint(int x, int y) {
+        int r = MathUtils.round((SQRT_3 * x - y) / (3f * RADIUS));
+        int g = MathUtils.round((-SQRT_3 * x - y) / (3f * RADIUS));
+        int b = -(r + g);
+
+        return new HexPoint(r, g, b);
     }
 }

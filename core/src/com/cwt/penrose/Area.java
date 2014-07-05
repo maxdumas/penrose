@@ -1,7 +1,7 @@
 package com.cwt.penrose;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.MathUtils;
+import com.cwt.penrose.misc.HexPoint;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,7 +11,7 @@ import java.util.Stack;
 /**
  * Created by Max on 6/5/2014.
  */
-class Area {
+public class Area {
     private final List<Piece> pieces = new ArrayList<Piece>();
     private final HashMap<Piece, Piece[]> adj = new HashMap<Piece, Piece[]>();
     private final int ownerId;
@@ -26,12 +26,10 @@ class Area {
     }
 
     public Piece getPiece(int x, int y) {
-        int r = MathUtils.round((Piece.SQRT_3 * x - y) / (3f * Piece.RADIUS));
-        int g = MathUtils.round((-Piece.SQRT_3 * x - y) / (3f * Piece.RADIUS));
-        int b = -(r + g);
+        HexPoint point = Piece.toHexPoint(x, y);
 
         for(Piece p : pieces)
-            if(p.r == r && p.g == g && p.b == b)
+            if(p.getHexCoords().equals(point))
                 return p;
 
         return null;
@@ -51,15 +49,17 @@ class Area {
         adj.put(p, n);
     }
 
-    public void removePiece(Piece p) {
-        pieces.remove(p);
+    public boolean removePiece(Piece p) {
+        if(!pieces.remove(p)) return false;
         Piece[] n = adj.get(p);
-        if(n == null) return;
+        if(n == null) return false;
         for(int i = 0; i < 6; ++i)
             if(n[i] != null)
                 // Get the adjacent piece, calculate the edge it must neighbor p on, then set that edge's neighbor to null.
                 adj.get(n[i])[(i + 3) % 6] = null;
         adj.remove(p);
+
+        return true;
     }
 
     /**

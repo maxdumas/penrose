@@ -1,4 +1,4 @@
-package com.cwt.penrose;
+package com.cwt.penrose.misc;
 
 import com.badlogic.gdx.InputProcessor;
 

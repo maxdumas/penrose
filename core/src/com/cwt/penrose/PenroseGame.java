@@ -12,20 +12,20 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
     boolean canPan = false;
 
     private SpriteBatch batch;
-	private TextureAtlas spritesheet;
     public OrthographicCamera sceneCamera;
+    public boolean ghostVisible = false, ghostInvalid = false;
     public final Piece ghost = new Piece(PieceType.PATH_LONG, 0, 0);
-    private final PlayerManager cpm = new PlayerManager(this, NUM_PLAYERS);
+    private PlayerManager cpm;
 
     static final float zoomFactor = 6f;
 
     @Override
 	public void create () {
         // Filter input through here first, then try the player manager.
+        cpm = new PlayerManager(this, NUM_PLAYERS);
         Gdx.input.setInputProcessor(new InputMultiplexer(this, cpm));
-
         batch = new SpriteBatch();
-        spritesheet = new TextureAtlas("sprite_sheet.txt");
+        TextureAtlas spritesheet = new TextureAtlas("sprite_sheet.txt");
         sceneCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         sceneCamera.zoom = zoomFactor;
 
@@ -45,8 +45,10 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
         batch.setProjectionMatrix(sceneCamera.combined);
         // Display areas here
         for(Area a : cpm.getAreas()) a.draw(batch);
-        if(cpm.getState() == PlayerState.CORRECTING) batch.setColor(1.0f, 0f, 0f, 1f);
-        if(cpm.getState() != PlayerState.SELECTING) ghost.draw(batch);
+        if(ghostVisible) {
+            if(ghostInvalid) batch.setColor(1.0f, 0f, 0f, 1f);
+            ghost.draw(batch);
+        }
 		batch.end();
 	}
 
@@ -98,7 +100,7 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
     public boolean mouseMoved(int screenX, int screenY) {
         Vector3 worldCoords = sceneCamera.unproject(new Vector3(screenX, screenY, 0f));
         int x = (int)worldCoords.x, y = (int)worldCoords.y;
-        if(cpm.getState() != PlayerState.SELECTING) {
+        if(cpm.getState() == PlayerState.POSITIONING) {
             ghost.x = x;
             ghost.y = y;
         }

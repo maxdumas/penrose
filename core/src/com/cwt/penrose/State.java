@@ -1,5 +1,7 @@
 package com.cwt.penrose;
 
+import com.cwt.penrose.commands.Command;
+
 /**
  * Created by Max on 6/29/2014.
  */
