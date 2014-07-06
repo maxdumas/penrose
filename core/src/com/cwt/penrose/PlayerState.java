@@ -40,7 +40,7 @@ public enum PlayerState implements State<PlayerManager> {
                 // Rotating the active piece
                 HexPoint p = Piece.toHexPoint(x, y);
                 if(game.ghost.getHexCoords().equals(p))
-                    return new RotateCommand(game.ghost, 1);
+                    return new RotateCommand(game, game.ghost, 1);
 
                 // Rotating an existing piece (originally placed in a previous phase)
                 selection = cpm.getArea().getPiece(x, y);
@@ -48,7 +48,7 @@ public enum PlayerState implements State<PlayerManager> {
                 // TODO: This should be allowed iff last piece is new or piece has not been moved this phase
                 // Maybe check if phase already contains a movement action, and disallow if true?
                 // Or check if the selection is the ghost, and deal with configuration case in some other way...?
-                    return new RotateCommand(selection, 1);
+                    return new RotateCommand(game, selection, 1);
             }
 
             return null;

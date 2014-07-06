@@ -95,11 +95,8 @@ public class PlayerManager extends DefaultInputProcessor {
                     return false;
                 }
                 // A new piece is being selected and so we are trying to start a new phase.
-                Command place = new PlaceCommand(game, this, new Piece(game.ghost));
-                boolean placed = place.execute();
-
-                if (placed) phases.peek().pushCommand(place);
-                else { // Current phase is invalid, alert user and don't allow a new phase to be created
+                boolean valid = endPhase();
+                if(!valid) { // Current phase is invalid, alert user and don't allow a new phase to be created
                     // TODO: Add button to allow moves to be undone in this case
                     System.out.println("Piece could not be placed! Reposition your piece or undo.");
                     game.ghostInvalid = true;
@@ -129,11 +126,32 @@ public class PlayerManager extends DefaultInputProcessor {
             usedAP -= p.getAPCost();
             p.undo();
             game.ghostInvalid = false;
+
+            return true;
         } else if(keycode == Input.Keys.SPACE && getAP() == 0) {
-            nextPlayer();
-            game.sceneCamera.position.set(getArea().getCenterX(), getArea().getCenterY(), 0f);
+            boolean valid = endPhase();
+            if(!valid) { // Current phase is invalid, alert user and don't allow turn to end.
+                System.out.println("Piece could not be placed! Reposition your piece or undo.");
+                game.ghostInvalid = true;
+            } else {
+                nextPlayer();
+                game.sceneCamera.position.set(getArea().getCenterX(), getArea().getCenterY(), 0f);
+            }
+
+            return true;
         }
 
+        return false;
+    }
+
+    private boolean endPhase() {
+        if(!phases.peek().isBegun()) return true;
+
+        Command place = new PlaceCommand(this, new Piece(game.ghost));
+        boolean placed = place.execute();
+        if (!placed) return false;
+
+        phases.peek().pushCommand(place);
         return true;
     }
 }

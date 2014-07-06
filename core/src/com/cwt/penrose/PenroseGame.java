@@ -39,8 +39,6 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
         if(ghostInvalid) batch.setColor(1f);
         else batch.setColor(1f, 1f, 1f, 1f);
         batch.begin();
-        // Display UI here
-        cpm.getHand().draw(batch);
         batch.setProjectionMatrix(sceneCamera.combined);
         // Display areas here
         for(Area a : cpm.getAreas()) a.draw(batch);
@@ -48,6 +46,8 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
             if(ghostInvalid) batch.setColor(1.0f, 0f, 0f, 1f);
             ghost.draw(batch);
         }
+        // Display UI here
+        cpm.getHand().draw(batch);
 		batch.end();
 	}
 

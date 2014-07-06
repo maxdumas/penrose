@@ -1,5 +1,6 @@
 package com.cwt.penrose.commands;
 
+import com.cwt.penrose.PenroseGame;
 import com.cwt.penrose.Piece;
 
 /**
@@ -7,9 +8,11 @@ import com.cwt.penrose.Piece;
  */
 public class RotateCommand implements Command {
     private final int rotationAmount;
+    private final PenroseGame game;
     private final Piece p;
 
-    public RotateCommand(Piece p, int rotationAmount) {
+    public RotateCommand(PenroseGame game, Piece p, int rotationAmount) {
+        this.game = game;
         this.p = p;
         this.rotationAmount = rotationAmount;
     }
@@ -17,6 +20,9 @@ public class RotateCommand implements Command {
     @Override
     public boolean execute() {
         p.rotate(true, rotationAmount);
+
+        game.ghostInvalid = false;
+        game.ghostVisible = true;
 
         return true;
     }
