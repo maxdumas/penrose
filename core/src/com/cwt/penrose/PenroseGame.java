@@ -8,8 +8,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.math.Vector3;
 
 public class PenroseGame extends ApplicationAdapter implements InputProcessor {
-    public static final int NUM_PLAYERS = 2;
-    boolean canPan = false;
+    private boolean canPan = false;
 
     private SpriteBatch batch;
     public OrthographicCamera sceneCamera;
@@ -21,15 +20,13 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
 
     @Override
 	public void create () {
+        PieceType.init(new TextureAtlas("sprite_sheet.txt"));
         // Filter input through here first, then try the player manager.
-        cpm = new PlayerManager(this, NUM_PLAYERS);
+        cpm = new PlayerManager(this);
         Gdx.input.setInputProcessor(new InputMultiplexer(this, cpm));
         batch = new SpriteBatch();
-        TextureAtlas spritesheet = new TextureAtlas("sprite_sheet.txt");
         sceneCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         sceneCamera.zoom = zoomFactor;
-
-        PieceType.init(spritesheet);
     }
 
 	@Override
@@ -39,7 +36,9 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         batch.setProjectionMatrix(sceneCamera.combined);
-		batch.begin();
+        if(ghostInvalid) batch.setColor(1f);
+        else batch.setColor(1f, 1f, 1f, 1f);
+        batch.begin();
         // Display UI here
         cpm.getHand().draw(batch);
         batch.setProjectionMatrix(sceneCamera.combined);
@@ -61,11 +60,6 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
 
     @Override
     public boolean keyUp(int keycode) {
-        if(keycode == Input.Keys.SPACE && cpm.getAP() == 0) { // end turn
-            cpm.getHand().setupPathHand(true);
-            sceneCamera.position.set(cpm.getArea().getCenterX(), cpm.getArea().getCenterY(), 0f);
-            cpm.nextPlayer();
-        }
         return false;
     }
 
@@ -76,14 +70,14 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        if(button == Input.Buttons.RIGHT) canPan = true;
+
         return false;
     }
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        switch (button) {
-            case Input.Buttons.RIGHT: canPan = false;
-        }
+        if(button == Input.Buttons.RIGHT) canPan = false;
 
         return false;
     }
@@ -93,7 +87,7 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
         if(canPan)
             sceneCamera.translate(-Gdx.input.getDeltaX() * sceneCamera.zoom, Gdx.input.getDeltaY() * sceneCamera.zoom);
 
-        return false;
+        return true;
     }
 
     @Override
@@ -104,7 +98,7 @@ public class PenroseGame extends ApplicationAdapter implements InputProcessor {
             ghost.x = x;
             ghost.y = y;
         }
-        return false;
+        return true;
     }
 
     @Override

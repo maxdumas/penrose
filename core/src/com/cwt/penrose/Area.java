@@ -69,9 +69,11 @@ public class Area {
      * @return true if the piece is a valid configuration and was thus added, false otherwise
      */
     public boolean addPieceIfValid(Piece p, int playerId) {
-        if (ownerId == playerId && pieces.isEmpty() && PieceType.isRoom(p)) {
-            addPiece(p, new Piece[6]);
-            return true;
+        if (pieces.isEmpty()) {
+            if(ownerId == playerId && PieceType.isRoom(p)) {
+                addPiece(p, new Piece[6]);
+                return true;
+            } else return false;
         }
 
         Piece[] neighbors = new Piece[6];
@@ -89,7 +91,7 @@ public class Area {
         }
         addPiece(p, neighbors); // Piece passed preliminary validation, now validate it in the context of the larger area
 
-        if(!validate(playerId)) {
+        if(!validate()) {
             removePiece(p);
             return false;
         } else return true;
@@ -99,7 +101,7 @@ public class Area {
      * Validates the current state of the area and checks if a victory condition has been met.
      * @return true if area state is valid, false otherwise.
      */
-    public boolean validate(int playerId) {
+    public boolean validate() {
         // The number of connected rooms (we always start with 1 room because the first piece is always a room
         int nRooms = 1;
         // The type of the edge of the last room from which we projected our search

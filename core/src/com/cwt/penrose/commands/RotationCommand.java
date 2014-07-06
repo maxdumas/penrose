@@ -6,8 +6,8 @@ import com.cwt.penrose.Piece;
  * Created by max on 7/3/14.
  */
 public class RotationCommand implements Command {
-    final int rotationAmount;
-    final Piece p;
+    private final int rotationAmount;
+    private final Piece p;
 
     public RotationCommand(Piece p, int rotationAmount) {
         this.p = p;

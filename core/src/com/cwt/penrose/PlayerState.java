@@ -31,7 +31,7 @@ public enum PlayerState implements State<PlayerManager> {
 
                 return new NewSelectionCommand(game, cpm, selection, fromHand);
 
-            } else if (Gdx.input.isButtonPressed(Input.Buttons.MIDDLE)) {
+            } else if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
                 // Discard a piece or rotate an existing piece.
                 Piece selection = cpm.getHand().getPiece(Gdx.input.getX(), Gdx.input.getY());
                 if(selection != null && !cpm.isPieceDiscarded()) // Hand was selected
@@ -53,7 +53,10 @@ public enum PlayerState implements State<PlayerManager> {
     POSITIONING {
         public Command handleInput(PenroseGame game, PlayerManager cpm) {
             if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
-                return new PositionCommand(game.ghost, Gdx.input.getX(), Gdx.input.getY());
+                Vector3 worldCoords = game.sceneCamera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0f));
+                int x = (int) worldCoords.x, y = (int) worldCoords.y;
+
+                return new PositionCommand(cpm, game.ghost, x, y);
             }
 
             return null;

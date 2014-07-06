@@ -9,10 +9,10 @@ import com.cwt.penrose.PlayerState;
  * Created by max on 7/3/14.
  */
 public class NewSelectionCommand implements Command {
-    final boolean fromHand;
-    final PenroseGame game;
-    final PlayerManager cpm;
-    final Piece selection;
+    private final boolean fromHand;
+    private final PenroseGame game;
+    private final PlayerManager cpm;
+    private final Piece selection;
 
     public NewSelectionCommand(PenroseGame game, PlayerManager cpm, Piece selection, boolean fromHand) {
         this.fromHand = fromHand;
@@ -24,11 +24,12 @@ public class NewSelectionCommand implements Command {
     @Override
     public boolean execute() {
         if(fromHand && !cpm.getHand().removePiece(selection)) return false;
-        else if (!cpm.getArea().removePiece(selection)) return false;
+        else if (!fromHand && !cpm.getArea().removePiece(selection)) return false;
 
-        game.ghost.set(selection.type, selection.x, selection.y, selection.rotationIndex);
-        cpm.setState(PlayerState.POSITIONING);
+        game.ghost.set(selection);
         game.ghostVisible = true;
+
+        cpm.setState(PlayerState.POSITIONING);
         return true;
     }
 
@@ -38,7 +39,7 @@ public class NewSelectionCommand implements Command {
         else cpm.getArea().addPieceIfValid(selection, cpm.getActivePlayer());
 
         game.ghostVisible = false;
-
+        cpm.setState(PlayerState.SELECTING);
 
         return true;
     }

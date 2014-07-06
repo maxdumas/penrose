@@ -25,7 +25,12 @@ public class Piece {
     public PieceType type;
     // It should be noted that any two of r, g, b are all that we require, but we keep
     // them all for simplicity
-    public int rotationIndex, x, y, r, g, b;
+    private int rotationIndex;
+    public int x;
+    public int y;
+    private int r;
+    private int g;
+    private int b;
 
     public Piece(PieceType type, int x, int y) {
         setPos(x, y);

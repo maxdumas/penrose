@@ -13,7 +13,7 @@ public class Phase implements Command {
     private final Deque<Command> commands = new LinkedList<Command>();
 
     public Phase(Command firstCommand) {
-        commands.push(firstCommand);
+        pushCommand(firstCommand);
     }
 
     public void pushCommand(Command c) {

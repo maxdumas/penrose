@@ -16,10 +16,10 @@ public class PlayerHand {
     private static final int PATH_HAND_SIZE = 4;
     private static final int ROOM_HAND_SIZE = 3;
 
-    final int playerId;
-    public final List<Piece> pathHand = new ArrayList<Piece>(PATH_HAND_SIZE);
-    public final List<Piece> roomHand = new ArrayList<Piece>(ROOM_HAND_SIZE);
-    final OrthographicCamera uiCamera;
+    private final int playerId;
+    private final List<Piece> pathHand = new ArrayList<Piece>(PATH_HAND_SIZE);
+    private final List<Piece> roomHand = new ArrayList<Piece>(ROOM_HAND_SIZE);
+    private final OrthographicCamera uiCamera;
 
     public PlayerHand(int playerId) {
         this.playerId = playerId;
@@ -29,12 +29,12 @@ public class PlayerHand {
     }
 
     public void setupPathHand(boolean refill) {
-        Object[] archetypes = PieceType.PATHS.toArray();
         for (int i = 0; i < pathHand.size(); ++i) {
             Piece p = pathHand.get(i);
             p.setPos(5 + p.type.centerX, (int) (1.1f * i * p.type.height + p.type.centerY));
         }
         if(!refill) return;
+        Object[] archetypes = PieceType.PATHS.toArray();
         for (int i = pathHand.size(); i < PATH_HAND_SIZE; ++i) {
             PieceType p = (PieceType) archetypes[MathUtils.random(archetypes.length - 1)];
             pathHand.add(new Piece(p, 5 + p.centerX, (int) (1.1f * i * p.height + p.centerY)));
@@ -42,12 +42,12 @@ public class PlayerHand {
     }
 
     public void setupRoomHand(boolean refill) {
-        Object[] archetypes = PieceType.ROOMS.toArray();
         for (int i = 0; i < roomHand.size(); ++i) {
             Piece p = roomHand.get(i);
             p.setPos((int) (Gdx.graphics.getWidth() * 6f - 5 - p.type.centerX), (int) (1.1f * i * p.type.height + p.type.centerY));
         }
         if(!refill) return;
+        Object[] archetypes = PieceType.ROOMS.toArray();
         for (int i = roomHand.size(); i < ROOM_HAND_SIZE; ++i) {
             PieceType p = (PieceType) archetypes[MathUtils.random(archetypes.length - 1)];
             roomHand.add(new Piece(p, (int) (Gdx.graphics.getWidth() * 6f - 5 - p.centerX), (int) (1.1f * i * p.height + p.centerY)));
