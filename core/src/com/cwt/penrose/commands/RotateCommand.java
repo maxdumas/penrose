@@ -5,11 +5,11 @@ import com.cwt.penrose.Piece;
 /**
  * Created by max on 7/3/14.
  */
-public class RotationCommand implements Command {
+public class RotateCommand implements Command {
     private final int rotationAmount;
     private final Piece p;
 
-    public RotationCommand(Piece p, int rotationAmount) {
+    public RotateCommand(Piece p, int rotationAmount) {
         this.p = p;
         this.rotationAmount = rotationAmount;
     }

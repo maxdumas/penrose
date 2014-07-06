@@ -19,7 +19,7 @@ public enum PlayerState implements State<PlayerManager> {
             if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
                 HexPoint p = Piece.toHexPoint(x, y);
                 if(game.ghost.getHexCoords().equals(p))
-                    return new ReselectCommand(game, cpm);
+                    return new ReSelectionCommand(game, cpm);
 
                 boolean fromHand = true;
                 Piece selection = cpm.getHand().getPiece(Gdx.input.getX(), Gdx.input.getY());
@@ -32,18 +32,23 @@ public enum PlayerState implements State<PlayerManager> {
                 return new SelectNewCommand(game, cpm, selection, fromHand);
 
             } else if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
-                // Discard a piece or rotate an existing piece.
+                // Discarding piece from hand
                 Piece selection = cpm.getHand().getPiece(Gdx.input.getX(), Gdx.input.getY());
                 if(selection != null && !cpm.isPieceDiscarded()) // Hand was selected
                     return new DiscardCommand(cpm, selection);
-                else {
-                    selection = cpm.getArea().getPiece(x, y);
-                    if(selection != null && selection == game.ghost)  // Rotate
-                    // TODO: This should be allowed iff last piece is new or piece has not been moved this phase
-                    // Maybe check if phase already contains a movement action, and disallow if true?
-                    // Or check if the selection is the ghost, and deal with configuration case in some other way...?
-                        return new RotationCommand(selection, 1);
-                }
+
+                // Rotating the active piece
+                HexPoint p = Piece.toHexPoint(x, y);
+                if(game.ghost.getHexCoords().equals(p))
+                    return new RotateCommand(game.ghost, 1);
+
+                // Rotating an existing piece (originally placed in a previous phase)
+                selection = cpm.getArea().getPiece(x, y);
+                if(selection != null)  // Rotate
+                // TODO: This should be allowed iff last piece is new or piece has not been moved this phase
+                // Maybe check if phase already contains a movement action, and disallow if true?
+                // Or check if the selection is the ghost, and deal with configuration case in some other way...?
+                    return new RotateCommand(selection, 1);
             }
 
             return null;
