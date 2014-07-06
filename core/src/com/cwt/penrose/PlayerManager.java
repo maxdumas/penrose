@@ -2,11 +2,11 @@ package com.cwt.penrose;
 
 import com.badlogic.gdx.Input;
 import com.cwt.penrose.commands.Command;
-import com.cwt.penrose.commands.NewSelectionCommand;
+import com.cwt.penrose.commands.PlaceCommand;
+import com.cwt.penrose.commands.SelectNewCommand;
 import com.cwt.penrose.misc.DefaultInputProcessor;
 
-import java.util.Deque;
-import java.util.LinkedList;
+import java.util.Stack;
 
 /**
  * Created by Max on 6/22/2014.
@@ -22,7 +22,7 @@ public class PlayerManager extends DefaultInputProcessor {
     private int usedAP = 0;
     private boolean pieceDiscarded = false;
     private PlayerState currentState = PlayerState.SELECTING;
-    private final Deque<Phase> phases = new LinkedList<Phase>();
+    private final Stack<Phase> phases = new Stack<Phase>();
     private final PenroseGame game;
 
     public PlayerManager(PenroseGame game) {
@@ -88,22 +88,18 @@ public class PlayerManager extends DefaultInputProcessor {
         Command c = getState().handleInput(game, this);
         if(c == null) return false;
 
-        if(c instanceof NewSelectionCommand) { // Start new phase whenever we issue a new selection
+        if(c instanceof SelectNewCommand) { // Start new phase whenever we issue a new selection
             if(!phases.isEmpty()) {
                 if(getAP() <= 0) {
                     System.out.println("You cannot use any more pieces this turn. Undo previous actions or end your turn.");
                     return false;
                 }
                 // A new piece is being selected and so we are trying to start a new phase.
-                boolean placed = getArea().addPieceIfValid(new Piece(game.ghost), getActivePlayer());
-                if (!placed && getAP() == 1) {
-                    for (int i = 0; i < NUM_PLAYERS; ++i)
-                        if (i != getActivePlayer() && getArea().addPieceIfValid(new Piece(game.ghost), getActivePlayer())) {
-                            placed = true;
-                            break;
-                        }
-                }
-                if(!placed) { // Current phase is invalid, alert user and don't allow a new phase to be created
+                Command place = new PlaceCommand(game, this, new Piece(game.ghost));
+                boolean placed = place.execute();
+
+                if (placed) phases.peek().pushCommand(place);
+                else { // Current phase is invalid, alert user and don't allow a new phase to be created
                     // TODO: Add button to allow moves to be undone in this case
                     System.out.println("Piece could not be placed! Reposition your piece or undo.");
                     game.ghostInvalid = true;
@@ -111,7 +107,7 @@ public class PlayerManager extends DefaultInputProcessor {
                 }
             }
             // This is either the first phase of the turn, or it is otherwise valid.
-            phases.add(new Phase(c));
+            phases.push(new Phase(c));
             c.execute();
             usedAP += c.getAPCost();
         } else if(phases.peek().isBegun()) {
@@ -128,7 +124,7 @@ public class PlayerManager extends DefaultInputProcessor {
 
     @Override
     public boolean keyUp(int keycode) {
-        if(keycode == Input.Keys.Z) {
+        if(keycode == Input.Keys.Z && !phases.isEmpty()) {
             Phase p = phases.pop();
             usedAP -= p.getAPCost();
             p.undo();

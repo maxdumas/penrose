@@ -78,6 +78,7 @@ public class Area {
 
         Piece[] neighbors = new Piece[6];
         for (Piece q : pieces) {
+            if(p.getHexCoords().equals(q.getHexCoords())) return false;
             // We don't want to be able to place any piece that blocks a connector
             // So if there is any piece that is not mutually adjacent to our new piece , then
             // this move is not valid.

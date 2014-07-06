@@ -8,13 +8,13 @@ import com.cwt.penrose.PlayerState;
 /**
  * Created by max on 7/3/14.
  */
-public class NewSelectionCommand implements Command {
+public class SelectNewCommand implements Command {
     private final boolean fromHand;
     private final PenroseGame game;
     private final PlayerManager cpm;
     private final Piece selection;
 
-    public NewSelectionCommand(PenroseGame game, PlayerManager cpm, Piece selection, boolean fromHand) {
+    public SelectNewCommand(PenroseGame game, PlayerManager cpm, Piece selection, boolean fromHand) {
         this.fromHand = fromHand;
         this.game = game;
         this.cpm = cpm;

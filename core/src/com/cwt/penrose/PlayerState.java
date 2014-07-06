@@ -19,7 +19,7 @@ public enum PlayerState implements State<PlayerManager> {
             if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
                 HexPoint p = Piece.toHexPoint(x, y);
                 if(game.ghost.getHexCoords().equals(p))
-                    return new ReSelectionCommand(game, cpm);
+                    return new ReselectCommand(game, cpm);
 
                 boolean fromHand = true;
                 Piece selection = cpm.getHand().getPiece(Gdx.input.getX(), Gdx.input.getY());
@@ -29,7 +29,7 @@ public enum PlayerState implements State<PlayerManager> {
                     else fromHand = false;
                 }
 
-                return new NewSelectionCommand(game, cpm, selection, fromHand);
+                return new SelectNewCommand(game, cpm, selection, fromHand);
 
             } else if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
                 // Discard a piece or rotate an existing piece.
