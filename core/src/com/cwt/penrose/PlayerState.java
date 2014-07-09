@@ -12,7 +12,7 @@ import com.cwt.penrose.misc.HexPoint;
 public enum PlayerState implements State<PlayerManager> {
     SELECTING {
         @Override
-        public Command handleInput(PenroseGame game, PlayerManager cpm) {
+        public Command handleInput(final PenroseGame game, final PlayerManager cpm) {
             Vector3 worldCoords = game.sceneCamera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0f));
             int x = (int) worldCoords.x, y = (int) worldCoords.y;
 
@@ -48,7 +48,10 @@ public enum PlayerState implements State<PlayerManager> {
                 // TODO: This should be allowed iff last piece is new or piece has not been moved this phase
                 // Maybe check if phase already contains a movement action, and disallow if true?
                 // Or check if the selection is the ghost, and deal with configuration case in some other way...?
-                    return new RotateCommand(game, selection, 1);
+                    return new Phase(
+                            new SelectNewCommand(game, cpm, selection, false),
+                            new PositionCommand(cpm, game.ghost, selection.x, selection.y),
+                            new RotateCommand(game, selection, 1));
             }
 
             return null;
@@ -56,7 +59,7 @@ public enum PlayerState implements State<PlayerManager> {
 
     },
     POSITIONING {
-        public Command handleInput(PenroseGame game, PlayerManager cpm) {
+        public Command handleInput(final PenroseGame game, final PlayerManager cpm) {
             if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
                 Vector3 worldCoords = game.sceneCamera.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0f));
                 int x = (int) worldCoords.x, y = (int) worldCoords.y;

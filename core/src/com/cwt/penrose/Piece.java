@@ -52,16 +52,18 @@ public class Piece {
         batch.draw(type.getTexture(), x - type.centerX, y - type.centerY, type.centerX, type.centerY, type.width, type.height, 1.0f, 1.0f, ROT_INTERVAL * (rotationIndex % 6));
     }
 
-    public void rotate(boolean ccw) {
-        rotate(ccw, 1);
+    public boolean rotate(boolean ccw) {
+        return rotate(ccw, 1);
     }
 
-    public void rotate(boolean ccw, int amount) {
-        if(PieceType.isRoom(this)) return;
+    public boolean rotate(boolean ccw, int amount) {
+        if(PieceType.isRoom(this)) return false;
 
         if(ccw)
             rotationIndex = (rotationIndex + amount) % 6;
         else rotationIndex = (rotationIndex - amount) % 6;
+
+        return true;
     }
 
     public void translate(int dx, int dy) {

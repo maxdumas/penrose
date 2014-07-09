@@ -3,7 +3,6 @@ package com.cwt.penrose;
 import com.badlogic.gdx.Input;
 import com.cwt.penrose.commands.Command;
 import com.cwt.penrose.commands.PlaceCommand;
-import com.cwt.penrose.commands.SelectNewCommand;
 import com.cwt.penrose.misc.DefaultInputProcessor;
 
 import java.util.Stack;
@@ -88,7 +87,7 @@ public class PlayerManager extends DefaultInputProcessor {
         Command c = getState().handleInput(game, this);
         if(c == null) return false;
 
-        if(c instanceof SelectNewCommand) { // Start new phase whenever we issue a new selection
+        if(c.getAPCost() > 0) { // Start new phase whenever we issue a new selection (only selections have AP < 0)
             if(!phases.isEmpty()) {
                 if(getAP() <= 0) {
                     System.out.println("You cannot use any more pieces this turn. Undo previous actions or end your turn.");
@@ -105,14 +104,15 @@ public class PlayerManager extends DefaultInputProcessor {
             }
             // This is either the first phase of the turn, or it is otherwise valid.
             phases.push(new Phase(c));
-            c.execute();
+            if(!c.execute()) return true;
             usedAP += c.getAPCost();
-        } else if(phases.peek().isBegun()) {
+        } else if(!phases.isEmpty() && phases.peek().isBegun()) {
             // Not a selection command, and not the first command of this phase, so we'll use it
-            usedAP += c.getAPCost();
-            if(usedAP <= MAX_TURN_AP) { // Only execute if it doesn't put us over our maximum allowable AP.
+
+            if(usedAP + c.getAPCost() <= MAX_TURN_AP) { // Only execute if it doesn't put us over our maximum allowable AP.
+                if(!c.execute()) return true;
                 phases.peek().pushCommand(c);
-                c.execute();
+                usedAP += c.getAPCost();
             } else System.out.println("This move is not allowed as it would cause you to go over your AP for this turn.");
         }
 

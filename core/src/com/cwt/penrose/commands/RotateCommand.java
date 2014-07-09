@@ -19,7 +19,7 @@ public class RotateCommand implements Command {
 
     @Override
     public boolean execute() {
-        p.rotate(true, rotationAmount);
+        if(!p.rotate(true, rotationAmount)) return false;
 
         game.ghostInvalid = false;
         game.ghostVisible = true;
